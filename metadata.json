@@ -1,0 +1,7 @@
+{
+  "name": "Church Media Manager",
+  "description": "Sistema privado de gestión de biblioteca multimedia y control de permisos de reproducción de video para reuniones virtuales.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
