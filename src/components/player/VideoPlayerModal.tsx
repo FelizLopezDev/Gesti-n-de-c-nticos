@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Play,
   Pause,
@@ -27,9 +27,32 @@ export const VideoPlayerModal: React.FC = () => {
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isBuffering, setIsBuffering] = useState<boolean>(false);
+  const [isControlsVisible, setIsControlsVisible] = useState<boolean>(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-hide controls in fullscreen after inactivity (2.5 seconds)
+  const resetControlsTimer = useCallback(() => {
+    setIsControlsVisible(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    // Only auto-hide if in fullscreen mode
+    if (isFullscreen) {
+      controlsTimeoutRef.current = setTimeout(() => {
+        setIsControlsVisible(false);
+      }, 2500);
+    }
+  }, [isFullscreen]);
+
+  // Handle activity inside fullscreen
+  const handleUserActivity = () => {
+    if (isFullscreen) {
+      resetControlsTimer();
+    }
+  };
 
   // Load video source
   useEffect(() => {
@@ -95,14 +118,62 @@ export const VideoPlayerModal: React.FC = () => {
     return () => clearInterval(interval);
   }, [videoSrc, isPlaying, activePlayerSong, totalSeconds]);
 
-  // Fullscreen change listener
+  // Fullscreen change listener across browsers
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const doc = document as any;
+      const isFs = !!(
+        doc.fullscreenElement ||
+        doc.webkitFullscreenElement ||
+        doc.mozFullScreenElement ||
+        doc.msFullscreenElement
+      );
+      setIsFullscreen(isFs);
+      if (isFs) {
+        resetControlsTimer();
+      } else {
+        setIsControlsVisible(true);
+        if (controlsTimeoutRef.current) {
+          clearTimeout(controlsTimeoutRef.current);
+        }
+      }
     };
+
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    };
+  }, [resetControlsTimer]);
+
+  // Keyboard shortcut handler (Space for play/pause, F for fullscreen, Esc handled by browser)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        handleTogglePlay();
+        handleUserActivity();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPlaying, isFullscreen]);
 
   if (!activePlayerSong) return null;
 
@@ -153,10 +224,32 @@ export const VideoPlayerModal: React.FC = () => {
   const toggleFullscreen = async () => {
     if (!containerRef.current) return;
     try {
-      if (!document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
+      const doc = document as any;
+      const elem = containerRef.current as any;
+
+      const isCurrentlyFs = !!(
+        doc.fullscreenElement ||
+        doc.webkitFullscreenElement ||
+        doc.mozFullScreenElement ||
+        doc.msFullscreenElement
+      );
+
+      if (!isCurrentlyFs) {
+        if (elem.requestFullscreen) {
+          await elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          await elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+          await elem.msRequestFullscreen();
+        }
       } else {
-        await document.exitFullscreen();
+        if (doc.exitFullscreen) {
+          await doc.exitFullscreen();
+        } else if (doc.webkitExitFullscreen) {
+          await doc.webkitExitFullscreen();
+        } else if (doc.msExitFullscreen) {
+          await doc.msExitFullscreen();
+        }
       }
     } catch (err) {
       console.warn('Fullscreen not supported or allowed:', err);
@@ -174,30 +267,50 @@ export const VideoPlayerModal: React.FC = () => {
   return (
     <div
       id="video-player-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-xs select-none"
+      className={
+        isFullscreen
+          ? 'fixed inset-0 z-50 bg-black p-0 overflow-hidden select-none'
+          : 'fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-xs select-none'
+      }
     >
       <div
         ref={containerRef}
         id="video-player-container"
-        className="relative w-full max-w-4xl bg-black rounded-xl overflow-hidden shadow-2xl flex flex-col"
+        onMouseMove={handleUserActivity}
+        onTouchStart={handleUserActivity}
+        className={
+          isFullscreen
+            ? `relative w-screen h-screen max-w-none rounded-none bg-black flex flex-col justify-center items-center overflow-hidden z-50 ${
+                !isControlsVisible ? 'cursor-none' : 'cursor-default'
+              }`
+            : 'relative w-full max-w-4xl bg-black rounded-xl overflow-hidden shadow-2xl flex flex-col cursor-default'
+        }
       >
-        {/* Top Header: ONLY Title and Close Button */}
-        <div className="flex items-center justify-between px-4 py-2.5 bg-stone-900/90 border-b border-stone-800 text-white z-10">
-          <h3 className="text-xs font-semibold tracking-wide truncate pr-4">
-            {activePlayerSong.title}
-          </h3>
-          <button
-            id="close-player-btn"
-            onClick={closePlayer}
-            className="p-1 rounded text-stone-400 hover:text-white transition-colors"
-            title="Cerrar"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        {/* Top Header: ONLY Title and Close Button (Completely HIDDEN in fullscreen) */}
+        {!isFullscreen && (
+          <div className="flex items-center justify-between px-4 py-2.5 bg-stone-900/90 border-b border-stone-800 text-white z-10">
+            <h3 className="text-xs font-semibold tracking-wide truncate pr-4">
+              {activePlayerSong.title}
+            </h3>
+            <button
+              id="close-player-btn"
+              onClick={closePlayer}
+              className="p-1 rounded text-stone-400 hover:text-white transition-colors cursor-pointer"
+              title="Cerrar"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
-        {/* Video Canvas */}
-        <div className="relative aspect-video w-full bg-black flex items-center justify-center overflow-hidden">
+        {/* Video Canvas - Fills full container in fullscreen */}
+        <div
+          className={
+            isFullscreen
+              ? 'relative w-full h-full flex-1 bg-black flex items-center justify-center overflow-hidden'
+              : 'relative aspect-video w-full bg-black flex items-center justify-center overflow-hidden'
+          }
+        >
           {isLoadingSrc ? (
             <div className="flex items-center gap-2 text-stone-400 text-xs">
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -218,7 +331,10 @@ export const VideoPlayerModal: React.FC = () => {
                 onWaiting={() => setIsBuffering(true)}
                 onPlaying={() => setIsBuffering(false)}
                 onError={() => setVideoError('Error al reproducir el formato de video.')}
-                onClick={handleTogglePlay}
+                onClick={() => {
+                  handleTogglePlay();
+                  handleUserActivity();
+                }}
               />
               {isBuffering && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
@@ -229,7 +345,10 @@ export const VideoPlayerModal: React.FC = () => {
           ) : (
             /* Minimal fallback for items without video file */
             <div
-              onClick={handleTogglePlay}
+              onClick={() => {
+                handleTogglePlay();
+                handleUserActivity();
+              }}
               className="relative w-full h-full flex flex-col items-center justify-center bg-stone-950 text-stone-300 cursor-pointer p-6"
             >
               <h2 className="text-xl font-semibold text-white tracking-tight text-center">
@@ -249,17 +368,40 @@ export const VideoPlayerModal: React.FC = () => {
           )}
         </div>
 
-        {/* Playback Controls Bar */}
-        <div className="px-4 py-3 bg-stone-900 border-t border-stone-800 text-white space-y-2">
+        {/* Playback Controls Bar:
+            In fullscreen: Overlays the bottom of the screen, auto-hiding after inactivity.
+            Outside fullscreen: Static bar below the video player. */}
+        <div
+          onMouseEnter={() => {
+            if (controlsTimeoutRef.current) {
+              clearTimeout(controlsTimeoutRef.current);
+            }
+          }}
+          onMouseLeave={() => {
+            if (isFullscreen) {
+              resetControlsTimer();
+            }
+          }}
+          className={
+            isFullscreen
+              ? `absolute bottom-0 left-0 right-0 z-40 transition-opacity duration-300 ${
+                  isControlsVisible
+                    ? 'opacity-100 pointer-events-auto'
+                    : 'opacity-0 pointer-events-none'
+                } bg-gradient-to-t from-black/95 via-black/60 to-transparent px-6 pb-6 pt-12 text-white space-y-3`
+              : 'px-4 py-3 bg-stone-900 border-t border-stone-800 text-white space-y-2'
+          }
+        >
           {/* Timeline / Progress Bar */}
-          <div className="flex items-center gap-2.5 text-xs font-mono text-stone-400">
+          <div className="flex items-center gap-2.5 text-xs font-mono text-stone-300">
             <span className="w-10 text-right">{formatTime(currentTime)}</span>
             <div
-              className="flex-1 h-2 bg-stone-800 rounded-full overflow-hidden cursor-pointer relative"
+              className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden cursor-pointer relative"
               onClick={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
                 const pos = (e.clientX - rect.left) / rect.width;
                 handleSeek(Math.floor(pos * totalSeconds));
+                handleUserActivity();
               }}
             >
               <div
@@ -276,8 +418,11 @@ export const VideoPlayerModal: React.FC = () => {
             <div className="flex items-center gap-3">
               <button
                 id="player-play-pause-btn"
-                onClick={handleTogglePlay}
-                className="p-1.5 rounded-md hover:bg-stone-800 text-white transition-colors cursor-pointer"
+                onClick={() => {
+                  handleTogglePlay();
+                  handleUserActivity();
+                }}
+                className="p-1.5 rounded-md hover:bg-white/10 text-white transition-colors cursor-pointer"
                 title={isPlaying ? 'Pausar' : 'Reproducir'}
               >
                 {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
@@ -285,8 +430,11 @@ export const VideoPlayerModal: React.FC = () => {
 
               <div className="flex items-center gap-1.5">
                 <button
-                  onClick={() => setIsMuted(!isMuted)}
-                  className="p-1.5 rounded-md hover:bg-stone-800 text-stone-300 hover:text-white transition-colors"
+                  onClick={() => {
+                    setIsMuted(!isMuted);
+                    handleUserActivity();
+                  }}
+                  className="p-1.5 rounded-md hover:bg-white/10 text-stone-300 hover:text-white transition-colors cursor-pointer"
                   title={isMuted ? 'Activar sonido' : 'Silenciar'}
                 >
                   {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -300,18 +448,19 @@ export const VideoPlayerModal: React.FC = () => {
                   onChange={(e) => {
                     setVolume(parseFloat(e.target.value));
                     setIsMuted(false);
+                    handleUserActivity();
                   }}
-                  className="w-16 sm:w-20 accent-white h-1 bg-stone-700 rounded cursor-pointer"
+                  className="w-16 sm:w-20 accent-white h-1 bg-white/30 rounded cursor-pointer"
                 />
               </div>
             </div>
 
-            {/* Right: Fullscreen */}
+            {/* Right: Fullscreen Toggle */}
             <div>
               <button
                 id="player-fullscreen-btn"
                 onClick={toggleFullscreen}
-                className="p-1.5 rounded-md hover:bg-stone-800 text-stone-300 hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 rounded-md hover:bg-white/10 text-stone-300 hover:text-white transition-colors cursor-pointer"
                 title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
               >
                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
