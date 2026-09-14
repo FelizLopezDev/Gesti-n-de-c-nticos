@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
 import {
-  Church,
-  Shield,
   LogOut,
   ChevronDown,
   User as UserIcon,
   Video,
-  KeyRound,
-  FileText,
-  Users,
-  History,
-  Layers,
-  Sparkles,
   Menu,
   X,
 } from 'lucide-react';
@@ -36,33 +28,33 @@ export const Navbar: React.FC = () => {
   if (!currentUser) return null;
 
   // Determine navigation items by role
-  const getNavItems = (): { id: ScreenId; label: string; icon: React.ReactNode }[] => {
+  const getNavItems = (): { id: ScreenId; label: string }[] => {
     switch (currentUser.role) {
       case 'SUPERADMIN':
         return [
-          { id: 'dashboard', label: 'Inicio', icon: <Church className="w-4 h-4" /> },
-          { id: 'library', label: 'Biblioteca', icon: <Video className="w-4 h-4" /> },
-          { id: 'admin-requests', label: 'Solicitudes', icon: <FileText className="w-4 h-4" /> },
-          { id: 'admin-permissions', label: 'Permisos', icon: <KeyRound className="w-4 h-4" /> },
-          { id: 'admin-songs', label: 'Canciones', icon: <Layers className="w-4 h-4" /> },
-          { id: 'admin-users', label: 'Usuarios', icon: <Users className="w-4 h-4" /> },
-          { id: 'admin-audit', label: 'Auditoría', icon: <History className="w-4 h-4" /> },
+          { id: 'dashboard', label: 'Inicio' },
+          { id: 'library', label: 'Biblioteca' },
+          { id: 'admin-requests', label: 'Solicitudes' },
+          { id: 'admin-permissions', label: 'Permisos' },
+          { id: 'admin-songs', label: 'Canciones' },
+          { id: 'admin-users', label: 'Usuarios' },
+          { id: 'admin-audit', label: 'Auditoría' },
         ];
       case 'ADMIN':
         return [
-          { id: 'dashboard', label: 'Inicio', icon: <Church className="w-4 h-4" /> },
-          { id: 'library', label: 'Biblioteca', icon: <Video className="w-4 h-4" /> },
-          { id: 'admin-requests', label: 'Solicitudes', icon: <FileText className="w-4 h-4" /> },
-          { id: 'admin-permissions', label: 'Permisos', icon: <KeyRound className="w-4 h-4" /> },
-          { id: 'admin-songs', label: 'Canciones', icon: <Layers className="w-4 h-4" /> },
+          { id: 'dashboard', label: 'Inicio' },
+          { id: 'library', label: 'Biblioteca' },
+          { id: 'admin-requests', label: 'Solicitudes' },
+          { id: 'admin-permissions', label: 'Permisos' },
+          { id: 'admin-songs', label: 'Canciones' },
         ];
       case 'USER':
       default:
         return [
-          { id: 'dashboard', label: 'Inicio', icon: <Church className="w-4 h-4" /> },
-          { id: 'library', label: 'Biblioteca', icon: <Video className="w-4 h-4" /> },
-          { id: 'my-requests', label: 'Mis solicitudes', icon: <FileText className="w-4 h-4" /> },
-          { id: 'my-permissions', label: 'Mis permisos', icon: <KeyRound className="w-4 h-4" /> },
+          { id: 'dashboard', label: 'Inicio' },
+          { id: 'library', label: 'Biblioteca' },
+          { id: 'my-requests', label: 'Mis solicitudes' },
+          { id: 'my-permissions', label: 'Mis permisos' },
         ];
     }
   };
@@ -71,25 +63,22 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-stone-200/90 shadow-xs">
-      {/* Top Prototype Testing Banner (Role Switcher for reviewers) */}
-      <div className="bg-stone-900 text-stone-300 text-xs px-4 py-1.5 flex items-center justify-between border-b border-stone-800">
+      {/* Top Prototype Role Switcher */}
+      <div className="bg-stone-900 text-stone-300 text-xs px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between border-b border-stone-800">
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 font-medium text-stone-200">
-            <Shield className="w-3.5 h-3.5 text-amber-400" />
-            <span>Prototipo UX / Rol activo:</span>
-          </span>
+          <span className="text-stone-400">Rol:</span>
           <span className="font-semibold text-white uppercase tracking-wider">{currentUser.role}</span>
           <span className="hidden sm:inline text-stone-400">({currentUser.displayName})</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-stone-400 hidden md:inline">Simular vista como:</span>
-          <div className="inline-flex rounded-md shadow-xs p-0.5 bg-stone-800 border border-stone-700">
+          <span className="text-stone-400 hidden sm:inline">Cambiar rol:</span>
+          <div className="inline-flex rounded-md p-0.5 bg-stone-800 border border-stone-700">
             <button
               id="switch-to-user-btn"
               onClick={() => switchRolePersona('USER')}
               className={`px-2 py-0.5 text-xs rounded transition-colors ${
                 currentUser.role === 'USER'
-                  ? 'bg-stone-600 text-white font-semibold'
+                  ? 'bg-stone-600 text-white font-medium'
                   : 'text-stone-300 hover:text-white'
               }`}
             >
@@ -100,7 +89,7 @@ export const Navbar: React.FC = () => {
               onClick={() => switchRolePersona('ADMIN')}
               className={`px-2 py-0.5 text-xs rounded transition-colors ${
                 currentUser.role === 'ADMIN'
-                  ? 'bg-stone-600 text-white font-semibold'
+                  ? 'bg-stone-600 text-white font-medium'
                   : 'text-stone-300 hover:text-white'
               }`}
             >
@@ -111,7 +100,7 @@ export const Navbar: React.FC = () => {
               onClick={() => switchRolePersona('SUPERADMIN')}
               className={`px-2 py-0.5 text-xs rounded transition-colors ${
                 currentUser.role === 'SUPERADMIN'
-                  ? 'bg-purple-800 text-white font-semibold'
+                  ? 'bg-stone-600 text-white font-medium'
                   : 'text-stone-300 hover:text-white'
               }`}
             >
@@ -123,26 +112,19 @@ export const Navbar: React.FC = () => {
 
       {/* Main Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo & App Name */}
-          <div className="flex items-center gap-3">
-            <div
-              id="app-brand-logo"
-              className="w-10 h-10 rounded-xl bg-stone-900 text-stone-100 flex items-center justify-center shadow-xs border border-stone-800 cursor-pointer"
-              onClick={() => setCurrentScreen('dashboard')}
-            >
-              <Church className="w-5 h-5 text-amber-300" />
-            </div>
-            <div className="cursor-pointer" onClick={() => setCurrentScreen('dashboard')}>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold text-stone-900 tracking-tight">Church Media Manager</h1>
-              </div>
-              <p className="text-xs text-stone-500 hidden sm:block">Biblioteca y control de reproducción Meet</p>
-            </div>
+        <div className="flex items-center justify-between h-14">
+          {/* Brand Name - Minimalist text without black/yellow church icon */}
+          <div
+            className="cursor-pointer"
+            onClick={() => setCurrentScreen('dashboard')}
+          >
+            <span className="text-base font-semibold tracking-tight text-stone-900">
+              Church Media
+            </span>
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-1 lg:space-x-1.5" aria-label="Navegación principal">
+          <nav className="hidden md:flex items-center space-x-1" aria-label="Navegación principal">
             {navItems.map((item) => {
               const isActive = currentScreen === item.id;
               return (
@@ -150,14 +132,13 @@ export const Navbar: React.FC = () => {
                   key={item.id}
                   id={`nav-link-${item.id}`}
                   onClick={() => setCurrentScreen(item.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                     isActive
-                      ? 'bg-stone-900 text-white shadow-xs'
+                      ? 'bg-stone-900 text-white'
                       : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
                   }`}
                 >
-                  {item.icon}
-                  <span>{item.label}</span>
+                  {item.label}
                 </button>
               );
             })}
@@ -165,15 +146,14 @@ export const Navbar: React.FC = () => {
 
           {/* Actions & Profile */}
           <div className="flex items-center gap-3">
-            {/* Multi-Request Floating Cart if songs selected */}
+            {/* Multi-Request Button if songs selected */}
             {selectedSongIdsForRequest.length > 0 && (
               <button
                 id="open-request-drawer-btn"
                 onClick={() => setIsRequestModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-stone-950 hover:bg-amber-400 transition-colors shadow-xs animate-pulse"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Solicitar ({selectedSongIdsForRequest.length})</span>
+                Solicitar ({selectedSongIdsForRequest.length})
               </button>
             )}
 
@@ -182,29 +162,20 @@ export const Navbar: React.FC = () => {
               <button
                 id="user-profile-menu-btn"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-stone-100 border border-transparent hover:border-stone-200 transition-colors text-left"
+                className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-stone-100 transition-colors text-left"
                 aria-expanded={isUserMenuOpen}
               >
-                <div className="w-8 h-8 rounded-full bg-stone-800 text-stone-100 flex items-center justify-center font-semibold text-xs border border-stone-300">
+                <div className="w-7 h-7 rounded-full bg-stone-800 text-stone-100 flex items-center justify-center font-medium text-xs">
                   {currentUser.displayName
                     .split(' ')
                     .map((n) => n[0])
                     .slice(0, 2)
                     .join('')}
                 </div>
-                <div className="hidden lg:block">
-                  <div className="text-xs font-semibold text-stone-900 leading-tight">
-                    {currentUser.displayName}
-                  </div>
-                  <div className="text-[11px] text-stone-500 leading-none mt-0.5">
-                    {currentUser.role === 'SUPERADMIN'
-                      ? 'Superadmin'
-                      : currentUser.role === 'ADMIN'
-                      ? 'Administrador'
-                      : 'Usuario'}
-                  </div>
-                </div>
-                <ChevronDown className="w-4 h-4 text-stone-400 hidden sm:block" />
+                <span className="text-xs font-medium text-stone-700 hidden sm:inline">
+                  {currentUser.displayName}
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 text-stone-400 hidden sm:block" />
               </button>
 
               {/* User Dropdown Menu */}
@@ -283,11 +254,10 @@ export const Navbar: React.FC = () => {
                   setCurrentScreen(item.id);
                   setIsMobileMenuOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${
+                className={`w-full flex items-center px-3 py-2.5 rounded-lg text-sm font-medium ${
                   isActive ? 'bg-stone-900 text-white' : 'text-stone-700 hover:bg-stone-100'
                 }`}
               >
-                {item.icon}
                 <span>{item.label}</span>
               </button>
             );

@@ -56,82 +56,76 @@ export const PermissionsScreen: React.FC<PermissionsScreenProps> = ({ isUserView
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-stone-900 tracking-tight flex items-center gap-2.5">
-              <KeyRound className="w-6 h-6 text-stone-700" />
-              <span>{isUserViewOnly ? 'Mis Permisos de Reproducción' : 'Control y Registro de Permisos'}</span>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 border border-stone-200">
-                {filteredPermissions.length} registros
-              </span>
-            </h1>
-            <p className="text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
-              {isUserViewOnly
-                ? 'Listado de tus autorizaciones activas, vencidas o revocadas para reuniones en Google Meet.'
-                : 'Auditoría clara de accesos: Permite responder exactamente quién otorgó acceso a cada colaborador y hasta qué hora.'}
-            </p>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 pb-4">
+        <div>
+          <h1 className="text-xl font-semibold text-stone-900 tracking-tight">
+            {isUserViewOnly ? 'Mis Permisos' : 'Registro de Permisos'}
+          </h1>
+          <p className="text-xs text-stone-500 mt-0.5">
+            {filteredPermissions.length} permisos registrados.
+          </p>
+        </div>
 
+        <div className="flex flex-wrap items-center gap-2">
           {/* Quick Filter buttons */}
-          <div className="flex items-center gap-1.5 p-1 bg-stone-100 rounded-lg text-xs">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setStatusFilter('ALL')}
-              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 statusFilter === 'ALL'
-                  ? 'bg-white text-stone-900 shadow-xs font-semibold'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-stone-900 text-white font-semibold'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
               }`}
             >
               Todos
             </button>
             <button
               onClick={() => setStatusFilter('ACTIVE')}
-              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 statusFilter === 'ACTIVE'
-                  ? 'bg-emerald-600 text-white shadow-xs font-semibold'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-emerald-700 text-white font-semibold'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
               }`}
             >
               Activos
             </button>
             <button
               onClick={() => setStatusFilter('EXPIRED')}
-              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 statusFilter === 'EXPIRED'
-                  ? 'bg-stone-700 text-white shadow-xs font-semibold'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-stone-700 text-white font-semibold'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
               }`}
             >
               Expirados
             </button>
             <button
               onClick={() => setStatusFilter('REVOKED')}
-              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 statusFilter === 'REVOKED'
-                  ? 'bg-rose-600 text-white shadow-xs font-semibold'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-rose-700 text-white font-semibold'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
               }`}
             >
               Revocados
             </button>
           </div>
-        </div>
 
-        {/* Search */}
-        <div className="mt-4 relative max-w-md">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
-            <Search className="w-4 h-4" />
+          {/* Search */}
+          <div className="relative w-full sm:w-60">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
+              <Search className="w-4 h-4" />
+            </div>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar..."
+              className="w-full pl-9.5 pr-3 py-1.5 text-xs bg-white border border-stone-300 rounded-lg focus:ring-2 focus:ring-stone-900"
+            />
           </div>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar por usuario, canción o administrador que otorgó..."
-            className="w-full pl-9.5 pr-3 py-2 text-xs bg-stone-50/70 border border-stone-300 rounded-lg focus:ring-2 focus:ring-stone-900"
-          />
         </div>
       </div>
 

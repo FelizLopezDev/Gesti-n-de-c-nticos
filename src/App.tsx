@@ -26,7 +26,7 @@ const MainLayout: React.FC = () => {
   // If user is not logged in or screen is explicitly 'login', show LoginScreen
   if (!currentUser || currentScreen === 'login') {
     return (
-      <div className="min-h-screen bg-stone-900 flex flex-col justify-center">
+      <div className="min-h-screen bg-stone-100 flex flex-col justify-center">
         <LoginScreen />
         <ToastContainer />
       </div>
@@ -54,6 +54,7 @@ const MainLayout: React.FC = () => {
         }
         return <AdminRequestsScreen />;
 
+      case 'admin-permissions':
       case 'permissions':
         if (currentUser.role === 'USER') {
           return <PermissionsScreen isUserViewOnly={true} />;

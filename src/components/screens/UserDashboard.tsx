@@ -1,20 +1,14 @@
 import React from 'react';
 import {
-  ShieldCheck,
-  Clock,
-  AlertTriangle,
   Play,
   ArrowRight,
-  Video,
-  FileText,
-  KeyRound,
-  Shield,
-  Info,
-  Calendar,
-  Sparkles,
+  Plus,
+  Clock,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { AccessStatusBadge, RoleBadge } from '../common/Badge';
+import { RequestStatusBadge } from '../common/Badge';
 
 export const UserDashboard: React.FC = () => {
   const {
@@ -24,287 +18,290 @@ export const UserDashboard: React.FC = () => {
     songs,
     setCurrentScreen,
     openPlayer,
-    openSongDetail,
+    openApprovalModal,
   } = useApp();
 
   if (!currentUser) return null;
 
-  // Filter current user's active permissions
+  const isAdminOrSuper = currentUser.role === 'ADMIN' || currentUser.role === 'SUPERADMIN';
+
+  // Active permissions for current user
   const now = new Date().toISOString();
   const myActivePermissions = permissions.filter(
     (p) => p.userId === currentUser.id && p.status === 'ACTIVE' && p.expiresAt > now
   );
 
-  // Expiring soon: within 12 hours
-  const twelveHoursFromNow = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
-  const myExpiringSoonPermissions = myActivePermissions.filter(
-    (p) => p.expiresAt <= twelveHoursFromNow
-  );
+  // All pending requests across the system (for Admin)
+  const allPendingRequests = requests.filter((r) => r.overallStatus === 'PENDING');
 
-  // My pending requests
-  const myPendingRequests = requests.filter(
-    (r) => r.userId === currentUser.id && r.overallStatus === 'PENDING'
-  );
+  // Active permissions across the system (for Admin)
+  const allActivePermissions = permissions.filter((p) => p.status === 'ACTIVE' && p.expiresAt > now);
 
-  // Calculate pending requested songs count
-  const myPendingSongsCount = myPendingRequests.reduce((acc, req) => {
-    return acc + req.items.filter((i) => i.status === 'PENDING').length;
-  }, 0);
+  // My requests (for User)
+  const myRequests = requests.filter((r) => r.userId === currentUser.id);
 
-  // Recent activity entries for this user
-  const recentUserActivity = [
-    ...myActivePermissions.map((p) => ({
-      id: p.id,
-      type: 'GRANTED' as const,
-      title: p.songTitle,
-      time: p.grantedAt,
-      detail: `Permiso concedido por ${p.grantedBy}. Válido hasta ${new Date(
-        p.expiresAt
-      ).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`,
-    })),
-    ...requests
-      .filter((r) => r.userId === currentUser.id)
-      .map((r) => ({
-        id: r.id,
-        type: 'REQUEST' as const,
-        title: `Solicitud ${r.id} (${r.items.length} canciones)`,
-        time: r.requestDate,
-        detail: `Propósito: ${r.meetingPurpose} - Estado: ${
-          r.overallStatus === 'PENDING' ? 'En revisión' : 'Procesada'
-        }`,
-      })),
-  ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 5);
+  // ---------------------------------------------------------------------------
+  // ADMIN & SUPERADMIN VIEW
+  // Prioritize: 1. Pending requests, 2. Song management, 3. Permissions
+  // ---------------------------------------------------------------------------
+  if (isAdminOrSuper) {
+    return (
+      <div className="space-y-6">
+        {/* Simple Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-stone-200 pb-4">
+          <div>
+            <h1 className="text-xl font-semibold text-stone-900 tracking-tight">
+              Panel de Administración
+            </h1>
+            <p className="text-xs text-stone-500 mt-0.5">
+              Gestión de solicitudes, catálogo de canciones y permisos activos.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentScreen('admin-songs')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Subir video MP4</span>
+            </button>
+          </div>
+        </div>
 
+        {/* 1. Pending Requests Section */}
+        <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-stone-900">
+                Solicitudes Pendientes
+              </h2>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
+                {allPendingRequests.length}
+              </span>
+            </div>
+            <button
+              onClick={() => setCurrentScreen('admin-requests')}
+              className="text-xs font-medium text-stone-600 hover:text-stone-900 flex items-center gap-1"
+            >
+              <span>Ver todas</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {allPendingRequests.length === 0 ? (
+            <p className="text-xs text-stone-500 py-4 text-center">
+              No hay solicitudes pendientes de aprobación.
+            </p>
+          ) : (
+            <div className="divide-y divide-stone-100">
+              {allPendingRequests.slice(0, 5).map((req) => (
+                <div
+                  key={req.id}
+                  className="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-stone-900">{req.userName}</span>
+                      <span className="text-stone-400">·</span>
+                      <span className="text-stone-600">{req.meetingPurpose}</span>
+                    </div>
+                    <div className="text-[11px] text-stone-500 mt-0.5">
+                      {req.items.length} canción(es): {req.items.map((i) => i.songTitle).join(', ')}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {req.items.filter((i) => i.status === 'PENDING').slice(0, 1).map((item) => (
+                      <button
+                        key={item.songId}
+                        onClick={() =>
+                          openApprovalModal({
+                            requestId: req.id,
+                            songId: item.songId,
+                            songTitle: item.songTitle,
+                            userId: req.userId,
+                            userName: req.userName,
+                            userEmail: req.userEmail,
+                          })
+                        }
+                        className="px-3 py-1 rounded-md text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors"
+                      >
+                        Revisar y Aprobar
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setCurrentScreen('admin-requests')}
+                      className="px-2.5 py-1 rounded-md text-xs text-stone-600 hover:text-stone-900 border border-stone-200"
+                    >
+                      Detalle
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 2. Song Management & Active Permissions side-by-side or stacked */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Song Management Overview */}
+          <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h2 className="text-sm font-semibold text-stone-900">
+                  Gestión de Canciones
+                </h2>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  {songs.length} canciones en la biblioteca
+                </p>
+              </div>
+              <button
+                onClick={() => setCurrentScreen('admin-songs')}
+                className="text-xs font-semibold text-stone-700 hover:text-stone-900 flex items-center gap-1"
+              >
+                <span>Administrar</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="divide-y divide-stone-100 text-xs">
+              {songs.slice(0, 4).map((s) => (
+                <div key={s.id} className="py-2.5 flex items-center justify-between">
+                  <span className="font-medium text-stone-800 truncate mr-2">{s.title}</span>
+                  <button
+                    onClick={() => openPlayer(s)}
+                    className="text-xs font-medium text-emerald-700 hover:text-emerald-800"
+                  >
+                    Reproducir
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Active Permissions Overview */}
+          <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h2 className="text-sm font-semibold text-stone-900">
+                  Permisos Activos
+                </h2>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  {allActivePermissions.length} accesos vigentes actualmente
+                </p>
+              </div>
+              <button
+                onClick={() => setCurrentScreen('admin-permissions')}
+                className="text-xs font-semibold text-stone-700 hover:text-stone-900 flex items-center gap-1"
+              >
+                <span>Ver todos</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {allActivePermissions.length === 0 ? (
+              <p className="text-xs text-stone-500 py-4 text-center">
+                No hay permisos vigentes en este momento.
+              </p>
+            ) : (
+              <div className="divide-y divide-stone-100 text-xs">
+                {allActivePermissions.slice(0, 4).map((p) => (
+                  <div key={p.id} className="py-2.5 flex items-center justify-between">
+                    <div>
+                      <span className="font-medium text-stone-900 block">{p.songTitle}</span>
+                      <span className="text-[11px] text-stone-500">{p.userName}</span>
+                    </div>
+                    <span className="text-[11px] text-stone-500 font-mono">
+                      Hasta {new Date(p.expiresAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // USER VIEW
+  // Main priorities: 1. Ready to play, 2. My requests, 3. Go to library
+  // ---------------------------------------------------------------------------
   return (
     <div className="space-y-6">
-      {/* Welcome & Role Notice */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-xs relative overflow-hidden">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
-                Panel de Colaborador
-              </span>
-              <RoleBadge role={currentUser.role} />
-            </div>
-            <h1 className="text-2xl font-bold text-stone-900 tracking-tight">
-              Bienvenido, {currentUser.displayName.split(' ')[0]}
-            </h1>
-            <p className="text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
-              Gestiona tus accesos temporales para reproducir canciones y pistas de alabanza
-              durante las reuniones virtuales de Google Meet.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        {/* Active Permissions Card */}
-        <div
-          id="summary-active-permissions"
-          onClick={() => setCurrentScreen('my-permissions')}
-          className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs hover:border-emerald-300 transition-all cursor-pointer group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
-              Accesos Activos
-            </span>
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-stone-900">{myActivePermissions.length}</span>
-            <span className="text-xs text-stone-500 font-medium">videos habilitados</span>
-          </div>
-          <p className="mt-2 text-xs text-emerald-700 flex items-center gap-1 font-medium">
-            <span>Listos para reproducir en Meet</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+      {/* Simple Top Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-stone-200 pb-4">
+        <div>
+          <h1 className="text-xl font-semibold text-stone-900 tracking-tight">
+            Inicio
+          </h1>
+          <p className="text-xs text-stone-500 mt-0.5">
+            Canciones habilitadas para reproducir y estado de tus solicitudes.
           </p>
         </div>
-
-        {/* Pending Requests Card */}
-        <div
-          id="summary-pending-requests"
-          onClick={() => setCurrentScreen('my-requests')}
-          className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs hover:border-amber-300 transition-all cursor-pointer group"
+        <button
+          onClick={() => setCurrentScreen('library')}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors self-start sm:self-auto"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
-              Solicitudes Pendientes
-            </span>
-            <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
-              <Clock className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-stone-900">{myPendingSongsCount}</span>
-            <span className="text-xs text-stone-500 font-medium">
-              en {myPendingRequests.length} solicitud(es)
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-amber-700 flex items-center gap-1 font-medium">
-            <span>En revisión por la administración</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-          </p>
-        </div>
-
-        {/* Expiring Soon Card */}
-        <div
-          id="summary-expiring-soon"
-          className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
-              Próximos a Expirar
-            </span>
-            <div className="w-9 h-9 rounded-lg bg-orange-50 text-orange-700 flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-stone-900">
-              {myExpiringSoonPermissions.length}
-            </span>
-            <span className="text-xs text-stone-500 font-medium">en menos de 12 horas</span>
-          </div>
-          <p className="mt-2 text-xs text-stone-500">
-            {myExpiringSoonPermissions.length > 0
-              ? 'Planifica tus reuniones antes del término'
-              : 'Sin vencimientos críticos inmediatos'}
-          </p>
-        </div>
+          <span>Ir a la biblioteca</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
       </div>
 
-      {/* Quick Actions Bar */}
-      <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-stone-700 uppercase tracking-wider">
-            Acciones Rápidas:
-          </span>
-        </div>
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            id="quick-action-explore"
-            onClick={() => setCurrentScreen('library')}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors shadow-xs"
-          >
-            <Video className="w-4 h-4" />
-            <span>Explorar biblioteca completa ({songs.length})</span>
-          </button>
-          <button
-            id="quick-action-requests"
-            onClick={() => setCurrentScreen('my-requests')}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-white border border-stone-300 text-stone-700 hover:bg-stone-100 transition-colors"
-          >
-            <FileText className="w-4 h-4" />
-            <span>Ver mis solicitudes</span>
-          </button>
-          <button
-            id="quick-action-permissions"
-            onClick={() => setCurrentScreen('my-permissions')}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-white border border-stone-300 text-stone-700 hover:bg-stone-100 transition-colors"
-          >
-            <KeyRound className="w-4 h-4" />
-            <span>Mis permisos activos</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Active Videos Section (Ready to Play) */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-xs">
+      {/* 1. Ready to Play Songs */}
+      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs">
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-base font-bold text-stone-900 tracking-tight flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-600" />
-              <span>Mis Canciones con Reproducción Habilitada</span>
-            </h2>
-            <p className="text-xs text-stone-500 mt-0.5">
-              Material con autorización vigente para transmitir en pantalla compartida de Meet
-            </p>
-          </div>
-          <button
-            onClick={() => setCurrentScreen('library')}
-            className="text-xs font-semibold text-stone-700 hover:text-stone-900 flex items-center gap-1"
-          >
-            <span>Ver todas las canciones</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          <h2 className="text-sm font-semibold text-stone-900">
+            Canciones Disponibles para Reproducir ({myActivePermissions.length})
+          </h2>
+          {myActivePermissions.length > 0 && (
+            <button
+              onClick={() => setCurrentScreen('my-permissions')}
+              className="text-xs text-stone-500 hover:text-stone-800"
+            >
+              Ver vigencias
+            </button>
+          )}
         </div>
 
         {myActivePermissions.length === 0 ? (
-          <div className="text-center py-10 px-4 border-2 border-dashed border-stone-200 rounded-xl">
-            <Video className="w-10 h-10 text-stone-400 mx-auto mb-2" />
-            <p className="text-sm font-semibold text-stone-800">No tienes permisos activos en este momento</p>
+          <div className="py-8 text-center">
+            <p className="text-xs text-stone-600 font-medium">
+              No tienes canciones habilitadas en este momento.
+            </p>
+            <p className="text-[11px] text-stone-500 mt-1">
+              Puedes solicitar acceso a las canciones necesarias desde la biblioteca.
+            </p>
             <button
               onClick={() => setCurrentScreen('library')}
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800"
+              className="mt-3 px-3 py-1.5 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors"
             >
-              <span>Solicitar canciones en la biblioteca</span>
+              Explorar biblioteca
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="divide-y divide-stone-100">
             {myActivePermissions.map((perm) => {
               const song = songs.find((s) => s.id === perm.songId);
               if (!song) return null;
-
-              const expiryDate = new Date(perm.expiresAt);
-              const expiryTimeStr = expiryDate.toLocaleTimeString('es-ES', {
-                hour: '2-digit',
-                minute: '2-digit',
-              });
-
               return (
                 <div
                   key={perm.id}
-                  className="rounded-xl border border-stone-200 bg-stone-50/50 p-4 hover:border-emerald-300 transition-all flex flex-col justify-between"
+                  className="py-3 flex items-center justify-between gap-4 text-xs"
                 >
                   <div>
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-stone-200/80 text-stone-700">
-                        {song.category}
-                      </span>
-                      <span className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        <span>Hasta hoy {expiryTimeStr}</span>
-                      </span>
-                    </div>
-
-                    <h3 className="text-sm font-bold text-stone-900 leading-snug line-clamp-1">
-                      {song.title}
-                    </h3>
-                    <p className="text-xs text-stone-500 mt-0.5 line-clamp-1">{song.artist}</p>
-
-                    <div className="mt-3 text-[11px] text-stone-600 space-y-1 bg-white p-2.5 rounded-lg border border-stone-200/60">
-                      <div className="flex justify-between">
-                        <span className="text-stone-500">Duración:</span>
-                        <span className="font-medium font-mono">{song.duration}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-stone-500">Concedido por:</span>
-                        <span className="font-medium">{perm.grantedBy}</span>
-                      </div>
-                    </div>
+                    <span className="font-semibold text-stone-900 block text-sm">{song.title}</span>
+                    <span className="text-[11px] text-stone-500">Disponible para transmitir en Google Meet</span>
                   </div>
-
-                  <div className="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between gap-2">
-                    <button
-                      onClick={() => openSongDetail(song)}
-                      className="text-xs text-stone-600 hover:text-stone-900 font-medium"
-                    >
-                      Detalles
-                    </button>
-                    <button
-                      id={`dashboard-play-${song.id}`}
-                      onClick={() => openPlayer(song)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors shadow-xs"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>Reproducir Video</span>
-                    </button>
-                  </div>
+                  <button
+                    id={`user-dashboard-play-${song.id}`}
+                    onClick={() => openPlayer(song)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors shadow-2xs shrink-0"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Reproducir</span>
+                  </button>
                 </div>
               );
             })}
@@ -312,43 +309,40 @@ export const UserDashboard: React.FC = () => {
         )}
       </div>
 
-      {/* Recent Activity Section */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-xs">
-        <h2 className="text-base font-bold text-stone-900 tracking-tight mb-4">
-          Actividad Reciente en tu Cuenta
-        </h2>
-        <div className="space-y-3">
-          {recentUserActivity.length === 0 ? (
-            <p className="text-xs text-stone-500 py-3">No hay registros de actividad reciente.</p>
-          ) : (
-            recentUserActivity.map((act) => (
-              <div
-                key={act.id}
-                className="flex items-start justify-between p-3 rounded-lg border border-stone-100 bg-stone-50/40 text-xs gap-3"
-              >
-                <div className="flex items-start gap-2.5">
-                  <div className="w-7 h-7 rounded-md bg-stone-200 flex items-center justify-center shrink-0 mt-0.5 text-stone-600">
-                    {act.type === 'GRANTED' ? (
-                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    ) : (
-                      <FileText className="w-4 h-4 text-sky-600" />
-                    )}
-                  </div>
-                  <div>
-                    <span className="font-semibold text-stone-900 block">{act.title}</span>
-                    <span className="text-stone-600 leading-relaxed">{act.detail}</span>
-                  </div>
-                </div>
-                <span className="text-[11px] text-stone-400 font-mono shrink-0 whitespace-nowrap">
-                  {new Date(act.time).toLocaleDateString('es-ES', {
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </span>
-              </div>
-            ))
-          )}
+      {/* 2. My Requests */}
+      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-stone-900">
+            Mis Solicitudes
+          </h2>
+          <button
+            onClick={() => setCurrentScreen('my-requests')}
+            className="text-xs font-medium text-stone-600 hover:text-stone-900 flex items-center gap-1"
+          >
+            <span>Ver historial</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
+
+        {myRequests.length === 0 ? (
+          <p className="text-xs text-stone-500 py-4 text-center">
+            No has enviado solicitudes recientemente.
+          </p>
+        ) : (
+          <div className="divide-y divide-stone-100 text-xs">
+            {myRequests.slice(0, 5).map((req) => (
+              <div key={req.id} className="py-2.5 flex items-center justify-between gap-3">
+                <div>
+                  <span className="font-medium text-stone-900 block">{req.meetingPurpose}</span>
+                  <span className="text-[11px] text-stone-500">
+                    {req.items.length} canción(es): {req.items.map((i) => i.songTitle).join(', ')}
+                  </span>
+                </div>
+                <RequestStatusBadge status={req.overallStatus} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

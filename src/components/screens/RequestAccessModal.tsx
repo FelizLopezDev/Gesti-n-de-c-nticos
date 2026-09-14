@@ -1,18 +1,10 @@
 import React, { useState } from 'react';
 import {
   X,
-  Plus,
   Trash2,
-  Calendar,
-  Sparkles,
-  Shield,
-  Clock,
   CheckCircle2,
-  FileText,
-  Music,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { Song } from '../../types';
 
 export const RequestAccessModal: React.FC = () => {
   const {
@@ -20,301 +12,198 @@ export const RequestAccessModal: React.FC = () => {
     setIsRequestModalOpen,
     selectedSongIdsForRequest,
     toggleSongSelectionForRequest,
-    clearSongSelectionForRequest,
     songs,
     submitAccessRequest,
     getUserSongAccessStatus,
   } = useApp();
 
-  const [meetingPurpose, setMeetingPurpose] = useState('');
-  const [meetingDate, setMeetingDate] = useState('2026-09-14');
-  const [meetingTime, setMeetingTime] = useState('19:00');
-  const [notes, setNotes] = useState('');
+  const [purpose, setPurpose] = useState('');
+  const [dateNeeded, setDateNeeded] = useState(() => {
+    const d = new Date();
+    return d.toISOString().split('T')[0];
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submittedRequestId, setSubmittedRequestId] = useState<string | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   if (!isRequestModalOpen) return null;
 
   const selectedSongs = songs.filter((s) => selectedSongIdsForRequest.includes(s.id));
 
-  // Eligible songs that can be added (not already selected, not currently pending, not currently available)
+  // Eligible songs that can be added
   const availableToAddSongs = songs.filter((s) => {
     if (selectedSongIdsForRequest.includes(s.id)) return false;
     const { status } = getUserSongAccessStatus(s.id);
     return status !== 'PENDING' && status !== 'AVAILABLE';
   });
 
-  const predefinedPurposes = [
-    'Reunión de Oración Virtual Google Meet',
-    'Culto Dominical Virtual',
-    'Escuela Bíblica de Niños',
-    'Grupo de Discipulado y Jóvenes',
-    'Reunión de Matrimonios',
-  ];
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedSongs.length === 0) return;
-
-    const finalPurpose = meetingPurpose.trim() || 'Reunión de Oración Virtual Google Meet';
+    if (selectedSongs.length === 0 || !purpose.trim()) return;
 
     setIsSubmitting(true);
     setTimeout(() => {
-      const fullDateTime = `${meetingDate}T${meetingTime}:00Z`;
       submitAccessRequest(
         selectedSongIdsForRequest,
-        finalPurpose,
-        fullDateTime,
-        notes.trim()
+        purpose.trim(),
+        `${dateNeeded}T19:00:00Z`,
+        ''
       );
       setIsSubmitting(false);
-      setSubmittedRequestId(`REQ-2026-${Math.floor(100 + Math.random() * 899)}`);
-    }, 450);
+      setIsSubmitted(true);
+    }, 300);
   };
 
   const handleClose = () => {
     setIsRequestModalOpen(false);
-    setSubmittedRequestId(null);
+    setIsSubmitted(false);
+    setPurpose('');
   };
 
   return (
     <div
       id="request-modal-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs overflow-y-auto animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/50 backdrop-blur-xs animate-fadeIn"
       onClick={(e) => {
         if (e.target === e.currentTarget) handleClose();
       }}
     >
       <div
         id="request-modal-container"
-        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-stone-200 overflow-hidden my-6"
+        className="relative w-full max-w-lg bg-white rounded-xl shadow-xl border border-stone-200 overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-200 bg-stone-50/70">
-          <div>
-            <h3 className="text-lg font-bold text-stone-900 tracking-tight">
-              Solicitar Acceso a Canciones
-            </h3>
-            <p className="text-xs text-stone-500 mt-0.5">
-              Puedes agrupar varias canciones en una sola solicitud para tu reunión de Google Meet
-            </p>
-          </div>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-200">
+          <h3 className="text-sm font-semibold text-stone-900">
+            Solicitar Acceso a Canciones
+          </h3>
           <button
             onClick={handleClose}
-            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 transition-colors"
+            className="p-1 rounded text-stone-400 hover:text-stone-700"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Form Body */}
-        {submittedRequestId ? (
-          /* Success State */
-          <div className="p-8 text-center space-y-4">
-            <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-xs">
-              <CheckCircle2 className="w-8 h-8" />
+        {isSubmitted ? (
+          /* Clean Success State */
+          <div className="p-6 text-center space-y-4">
+            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold text-stone-900">¡Solicitud Enviada con Éxito!</h3>
-            <p className="text-xs text-stone-600 max-w-md mx-auto leading-relaxed">
-              Tu solicitud ha sido registrada en el sistema. Los administradores recibirán la
-              notificación para evaluar la duración de acceso solicitada antes de la reunión.
-            </p>
-
-            <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 max-w-md mx-auto text-left text-xs space-y-1.5">
-              <div className="flex justify-between">
-                <span className="text-stone-500">Reunión:</span>
-                <span className="font-semibold text-stone-800">{meetingPurpose}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-stone-500">Canciones solicitadas:</span>
-                <span className="font-semibold text-stone-800">{selectedSongs.length} temas</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-stone-500">Estado:</span>
-                <span className="font-semibold text-amber-700">Pendiente de Aprobación</span>
-              </div>
+            <div>
+              <h4 className="text-base font-semibold text-stone-900">Solicitud enviada</h4>
+              <p className="text-xs text-stone-500 mt-1">
+                La solicitud ha sido registrada y está pendiente de revisión.
+              </p>
             </div>
-
-            <div className="pt-3">
-              <button
-                onClick={handleClose}
-                className="px-5 py-2.5 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors shadow-xs"
-              >
-                Entendido y volver a la biblioteca
-              </button>
-            </div>
+            <button
+              onClick={handleClose}
+              className="px-4 py-2 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors"
+            >
+              Cerrar
+            </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[calc(85vh-130px)] overflow-y-auto">
-            {/* Selected songs list */}
+          <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+            {/* Selected songs */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-stone-700">
-                  Canciones Seleccionadas ({selectedSongs.length})
-                </label>
-                {selectedSongs.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={clearSongSelectionForRequest}
-                    className="text-xs text-stone-400 hover:text-stone-700"
-                  >
-                    Quitar todas
-                  </button>
-                )}
-              </div>
-
+              <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+                Canciones seleccionadas ({selectedSongs.length})
+              </label>
               {selectedSongs.length === 0 ? (
-                <div className="p-4 rounded-xl border-2 border-dashed border-stone-200 text-center bg-stone-50/50">
-                  <Music className="w-6 h-6 text-stone-400 mx-auto mb-1.5" />
-                  <p className="text-xs font-semibold text-stone-700">
-                    No has seleccionado ninguna canción aún
-                  </p>
-                  <p className="text-[11px] text-stone-500 mt-0.5">
-                    Elige una o más de la lista desplegable abajo para añadirlas.
-                  </p>
-                </div>
+                <p className="text-stone-500 italic py-2">
+                  No hay canciones seleccionadas. Elige una abajo.
+                </p>
               ) : (
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
                   {selectedSongs.map((song) => (
                     <div
                       key={song.id}
-                      className="flex items-center justify-between p-3 rounded-lg border border-stone-200 bg-stone-50/60 text-xs"
+                      className="flex items-center justify-between px-3 py-2 rounded-lg bg-stone-50 border border-stone-200"
                     >
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
-                        <div>
-                          <span className="font-bold text-stone-900 block">{song.title}</span>
-                          <span className="text-stone-500 text-[11px]">
-                            {song.artist} · {song.category} ({song.duration})
-                          </span>
-                        </div>
-                      </div>
-
+                      <span className="font-medium text-stone-900 truncate">{song.title}</span>
                       <button
                         type="button"
                         onClick={() => toggleSongSelectionForRequest(song.id)}
-                        className="p-1 text-stone-400 hover:text-rose-600 rounded hover:bg-stone-100 transition-colors"
-                        title="Quitar de la solicitud"
+                        className="text-stone-400 hover:text-rose-600 p-1"
+                        title="Quitar"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* Add more eligible songs fillable input */}
+              {/* Add another song option */}
               {availableToAddSongs.length > 0 && (
-                <div className="mt-3">
-                  <input
-                    type="text"
-                    placeholder="+ Escribe o selecciona una canción para añadirla a esta solicitud..."
-                    list="available-songs-datalist"
+                <div className="mt-2">
+                  <select
+                    value=""
                     onChange={(e) => {
-                      const val = e.target.value.trim().toLowerCase();
-                      const found = availableToAddSongs.find(
-                        (s) =>
-                          s.title.toLowerCase() === val ||
-                          `${s.title} — ${s.category}`.toLowerCase() === val ||
-                          `${s.title} (${s.artist})`.toLowerCase() === val
-                      );
-                      if (found) {
-                        toggleSongSelectionForRequest(found.id);
-                        e.target.value = '';
+                      if (e.target.value) {
+                        toggleSongSelectionForRequest(e.target.value);
                       }
                     }}
-                    className="w-full text-xs py-2 px-3 rounded-lg border border-dashed border-stone-300 bg-stone-50/40 text-stone-800 placeholder:text-stone-500 focus:ring-2 focus:ring-stone-900"
-                  />
-                  <datalist id="available-songs-datalist">
+                    className="w-full px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-600 focus:ring-2 focus:ring-stone-900"
+                  >
+                    <option value="">+ Añadir otra canción...</option>
                     {availableToAddSongs.map((s) => (
-                      <option key={s.id} value={`${s.title} — ${s.category}`} />
+                      <option key={s.id} value={s.id}>
+                        {s.title}
+                      </option>
                     ))}
-                  </datalist>
+                  </select>
                 </div>
               )}
             </div>
 
-            {/* Meeting Purpose */}
+            {/* 1. Purpose (Required) */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5">
-                Propósito o Servicio de Google Meet *
+              <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+                Propósito *
               </label>
               <input
-                id="request-meeting-purpose-input"
+                id="request-purpose-input"
                 type="text"
                 required
-                value={meetingPurpose}
-                onChange={(e) => setMeetingPurpose(e.target.value)}
-                placeholder="Escribe el propósito (ej. Reunión de Oración, Culto Dominical, Escuela Bíblica, etc.)..."
-                list="purpose-suggestions"
-                className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-300 rounded-lg focus:ring-2 focus:ring-stone-900 text-stone-800"
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
+                placeholder="Ej. Reunión dominical, servicio de oración..."
+                className="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-lg focus:ring-2 focus:ring-stone-900 text-xs text-stone-900"
               />
-              <datalist id="purpose-suggestions">
-                {predefinedPurposes.map((p) => (
-                  <option key={p} value={p} />
-                ))}
-              </datalist>
             </div>
 
-            {/* Meeting Date & Estimated Time */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5">
-                  Fecha de la Reunión
-                </label>
-                <input
-                  type="date"
-                  value={meetingDate}
-                  onChange={(e) => setMeetingDate(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-300 rounded-lg focus:ring-2 focus:ring-stone-900 text-stone-800"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5">
-                  Hora de Inicio Estimada
-                </label>
-                <input
-                  type="time"
-                  value={meetingTime}
-                  onChange={(e) => setMeetingTime(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-300 rounded-lg focus:ring-2 focus:ring-stone-900 text-stone-800"
-                />
-              </div>
-            </div>
-
-            {/* Additional notes */}
+            {/* 2. Date Needed (Required) */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5">
-                Notas para los Administradores (Opcional)
+              <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+                Fecha requerida *
               </label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={2}
-                placeholder="Ej. Requerimos la pista para guiar el momento de alabanza congregacional."
-                className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-300 rounded-lg focus:ring-2 focus:ring-stone-900 placeholder:text-stone-400"
+              <input
+                id="request-date-input"
+                type="date"
+                required
+                value={dateNeeded}
+                onChange={(e) => setDateNeeded(e.target.value)}
+                className="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-lg focus:ring-2 focus:ring-stone-900 text-xs text-stone-900"
               />
             </div>
 
             {/* Actions footer */}
-            <div className="pt-2 border-t border-stone-200 flex items-center justify-end gap-3">
+            <div className="pt-3 border-t border-stone-200 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2 text-xs font-semibold text-stone-700 bg-white border border-stone-300 rounded-lg hover:bg-stone-100"
+                className="px-4 py-2 text-xs font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                disabled={selectedSongs.length === 0 || isSubmitting}
-                className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 disabled:opacity-50 rounded-lg shadow-xs transition-colors cursor-pointer"
+                disabled={selectedSongs.length === 0 || !purpose.trim() || isSubmitting}
+                className="px-4 py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 disabled:opacity-50 rounded-lg transition-colors cursor-pointer"
               >
-                {isSubmitting ? (
-                  <span>Enviando solicitud...</span>
-                ) : (
-                  <span>Enviar Solicitud ({selectedSongs.length} temas)</span>
-                )}
+                {isSubmitting ? 'Enviando...' : 'Enviar solicitud'}
               </button>
             </div>
           </form>
