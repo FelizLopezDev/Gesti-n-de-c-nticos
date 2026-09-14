@@ -229,8 +229,8 @@ export const PermissionsScreen: React.FC<PermissionsScreenProps> = ({ isUserView
                       {/* Actions */}
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {/* Play button if current user and active */}
-                          {isCurrentlyActive && song && (
+                          {/* Play button if active permission or admin */}
+                          {song && (isCurrentlyActive || currentUser?.role !== 'USER') && (
                             <button
                               id={`perm-play-btn-${perm.id}`}
                               onClick={() => openPlayer(song)}

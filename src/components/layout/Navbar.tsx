@@ -33,20 +33,18 @@ export const Navbar: React.FC = () => {
       case 'SUPERADMIN':
         return [
           { id: 'dashboard', label: 'Inicio' },
-          { id: 'library', label: 'Biblioteca' },
           { id: 'admin-requests', label: 'Solicitudes' },
-          { id: 'admin-permissions', label: 'Permisos' },
           { id: 'admin-songs', label: 'Canciones' },
+          { id: 'admin-permissions', label: 'Permisos' },
           { id: 'admin-users', label: 'Usuarios' },
           { id: 'admin-audit', label: 'Auditoría' },
         ];
       case 'ADMIN':
         return [
           { id: 'dashboard', label: 'Inicio' },
-          { id: 'library', label: 'Biblioteca' },
           { id: 'admin-requests', label: 'Solicitudes' },
-          { id: 'admin-permissions', label: 'Permisos' },
           { id: 'admin-songs', label: 'Canciones' },
+          { id: 'admin-permissions', label: 'Permisos' },
         ];
       case 'USER':
       default:
@@ -146,8 +144,8 @@ export const Navbar: React.FC = () => {
 
           {/* Actions & Profile */}
           <div className="flex items-center gap-3">
-            {/* Multi-Request Button if songs selected */}
-            {selectedSongIdsForRequest.length > 0 && (
+            {/* Multi-Request Button only for regular User */}
+            {currentUser.role === 'USER' && selectedSongIdsForRequest.length > 0 && (
               <button
                 id="open-request-drawer-btn"
                 onClick={() => setIsRequestModalOpen(true)}
@@ -197,22 +195,45 @@ export const Navbar: React.FC = () => {
                   </div>
 
                   <div className="px-2 py-1.5">
-                    <button
-                      id="menu-goto-library"
-                      onClick={() => setCurrentScreen('library')}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-lg text-left"
-                    >
-                      <Video className="w-4 h-4 text-stone-500" />
-                      <span>Explorar biblioteca</span>
-                    </button>
-                    <button
-                      id="menu-goto-dashboard"
-                      onClick={() => setCurrentScreen('dashboard')}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-lg text-left"
-                    >
-                      <UserIcon className="w-4 h-4 text-stone-500" />
-                      <span>Mi panel principal</span>
-                    </button>
+                    {currentUser.role === 'USER' ? (
+                      <>
+                        <button
+                          id="menu-goto-library"
+                          onClick={() => setCurrentScreen('library')}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-lg text-left"
+                        >
+                          <Video className="w-4 h-4 text-stone-500" />
+                          <span>Biblioteca</span>
+                        </button>
+                        <button
+                          id="menu-goto-dashboard"
+                          onClick={() => setCurrentScreen('dashboard')}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-lg text-left"
+                        >
+                          <UserIcon className="w-4 h-4 text-stone-500" />
+                          <span>Inicio</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          id="menu-goto-admin-songs"
+                          onClick={() => setCurrentScreen('admin-songs')}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-lg text-left"
+                        >
+                          <Video className="w-4 h-4 text-stone-500" />
+                          <span>Canciones</span>
+                        </button>
+                        <button
+                          id="menu-goto-dashboard"
+                          onClick={() => setCurrentScreen('dashboard')}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-lg text-left"
+                        >
+                          <UserIcon className="w-4 h-4 text-stone-500" />
+                          <span>Inicio</span>
+                        </button>
+                      </>
+                    )}
                   </div>
 
                   <div className="border-t border-stone-100 px-2 pt-1.5">

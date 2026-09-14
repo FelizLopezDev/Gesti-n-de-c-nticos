@@ -209,12 +209,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const matched = users.find((u) => u.role === role && u.status === 'ACTIVE');
     if (matched) {
       setCurrentUser(matched);
-      // Adjust default screen if current screen is admin only and we switched to user
+      clearSongSelectionForRequest();
+      // Adjust screen if current screen is not permitted for the new role
       if (
         role === 'USER' &&
         ['admin-requests', 'admin-permissions', 'admin-songs', 'admin-users', 'admin-audit'].includes(
           currentScreen
         )
+      ) {
+        setCurrentScreen('dashboard');
+      } else if (
+        (role === 'ADMIN' || role === 'SUPERADMIN') &&
+        ['library', 'my-requests', 'my-permissions'].includes(currentScreen)
+      ) {
+        setCurrentScreen('dashboard');
+      } else if (
+        role === 'ADMIN' &&
+        ['admin-users', 'admin-audit'].includes(currentScreen)
       ) {
         setCurrentScreen('dashboard');
       }
@@ -296,6 +307,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Player handlers
   const openPlayer = (song: Song) => {
+    // Admin and Superadmin manage songs and can play them directly
+    if (currentUser?.role === 'ADMIN' || currentUser?.role === 'SUPERADMIN') {
+      setActivePlayerSong(song);
+      setActivePlayerPermission(null);
+      return;
+    }
+
     const { status, permission } = getUserSongAccessStatus(song.id);
     if (status === 'AVAILABLE' && permission) {
       setActivePlayerSong(song);

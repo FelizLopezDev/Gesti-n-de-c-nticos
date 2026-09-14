@@ -40,12 +40,21 @@ const MainLayout: React.FC = () => {
         return <UserDashboard />;
 
       case 'library':
+        if (currentUser.role !== 'USER') {
+          return <SongManagementScreen />;
+        }
         return <LibraryScreen />;
 
       case 'my-requests':
+        if (currentUser.role !== 'USER') {
+          return <AdminRequestsScreen />;
+        }
         return <AdminRequestsScreen isUserViewOnly={true} />;
 
       case 'my-permissions':
+        if (currentUser.role !== 'USER') {
+          return <PermissionsScreen />;
+        }
         return <PermissionsScreen isUserViewOnly={true} />;
 
       case 'admin-requests':
