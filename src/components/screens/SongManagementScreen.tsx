@@ -132,9 +132,7 @@ export const SongManagementScreen: React.FC = () => {
     try {
       await uploadSongWithFile(selectedFile, {
         title: songName.trim(),
-        artist: 'Congregación',
-        category: 'Alabanza',
-        durationFormatted: videoDuration || '3:30',
+        durationFormatted: videoDuration || '03:30',
         durationSeconds: videoDurationSec || 210,
       });
       setIsUploadModalOpen(false);
@@ -185,7 +183,7 @@ export const SongManagementScreen: React.FC = () => {
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Subir video</span>
+            <span>Subir canción</span>
           </button>
         </div>
       </div>
@@ -276,7 +274,7 @@ export const SongManagementScreen: React.FC = () => {
             {/* Modal Header */}
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-200">
               <h3 className="text-sm font-semibold text-stone-900">
-                {editingSong ? 'Editar Canción' : 'Subir Video'}
+                {editingSong ? 'Editar Canción' : 'Subir Canción'}
               </h3>
               <button
                 onClick={() => setIsUploadModalOpen(false)}
@@ -292,7 +290,7 @@ export const SongManagementScreen: React.FC = () => {
               {!editingSong && (
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 mb-1.5">
-                    Archivo MP4 *
+                    Seleccionar MP4 *
                   </label>
                   <div
                     onDragOver={(e) => e.preventDefault()}
@@ -308,20 +306,29 @@ export const SongManagementScreen: React.FC = () => {
                       className="hidden"
                     />
                     {selectedFile ? (
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         <FileVideo className="w-8 h-8 text-stone-700 mx-auto" />
                         <p className="font-semibold text-stone-900 text-sm">{selectedFile.name}</p>
-                        <p className="text-[11px] text-stone-500">
-                          {formatFileSize(selectedFile.size)} {videoDuration ? `· ${videoDuration}` : ''}
-                        </p>
+                        {/* Automatic technical metadata (read-only) */}
+                        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-stone-100 text-[11px] text-stone-600 font-mono">
+                          <span>{formatFileSize(selectedFile.size)}</span>
+                          <span>•</span>
+                          <span>{selectedFile.type || 'video/mp4'}</span>
+                          {videoDuration && (
+                            <>
+                              <span>•</span>
+                              <span>{videoDuration}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-1">
                         <UploadCloud className="w-8 h-8 text-stone-400 mx-auto" />
                         <p className="font-medium text-stone-700">
-                          Haz clic para seleccionar o arrastra un video MP4
+                          Haz clic para seleccionar o arrastra un archivo MP4
                         </p>
-                        <p className="text-[11px] text-stone-400">Formato compatible: MP4</p>
+                        <p className="text-[11px] text-stone-400">Formato: MP4</p>
                       </div>
                     )}
                   </div>
@@ -357,7 +364,7 @@ export const SongManagementScreen: React.FC = () => {
                   id="submit-upload-btn"
                   type="submit"
                   disabled={isProcessing || (!editingSong && !selectedFile)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-50 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   {isProcessing ? (
                     <>
@@ -365,7 +372,7 @@ export const SongManagementScreen: React.FC = () => {
                       <span>Procesando video...</span>
                     </>
                   ) : (
-                    <span>{editingSong ? 'Guardar cambios' : 'Subir video'}</span>
+                    <span>{editingSong ? 'Guardar cambios' : 'Subir canción'}</span>
                   )}
                 </button>
               </div>

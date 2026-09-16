@@ -23,22 +23,14 @@ export interface User {
 export interface Song {
   id: string;
   title: string;
-  artist: string;
-  category: string;
-  duration: string; // e.g. "04:25"
-  durationSeconds: number;
-  musicalKey: string; // e.g. "Sol Mayor (G)"
-  tempoBpm: number;
-  thumbnailGradient: string;
-  description: string;
-  recommendedUse: string; // e.g. "Apertura reunión Google Meet"
   uploadedAt: string;
   uploadedBy: string;
-  isPrivate: boolean;
-  videoUrl?: string; // Direct playable blob URL or source
-  fileName?: string;
+  duration?: string; // Automatically extracted, e.g. "04:25"
+  durationSeconds?: number;
+  videoFileName?: string;
   fileSizeBytes?: number;
-  thumbnailUrl?: string;
+  mimeType?: string;
+  videoUrl?: string; // Playable blob URL or stream
 }
 
 export interface Permission {

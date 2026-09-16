@@ -53,29 +53,26 @@ export const SongDetailScreen: React.FC<SongDetailModalProps> = ({ song, onClose
         className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-stone-200 overflow-hidden"
       >
         {/* Header Preview Banner */}
-        <div
-          className={`h-36 bg-gradient-to-r ${song.thumbnailGradient} p-6 flex flex-col justify-between text-white relative`}
-        >
+        <div className="bg-stone-900 p-6 flex flex-col justify-between text-white relative">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded bg-black/40 backdrop-blur-xs">
-              {song.category}
+            <span className="text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded bg-stone-800">
+              Video MP4
             </span>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-full bg-black/40 hover:bg-black/70 text-white transition-colors"
+              className="p-1.5 rounded-full bg-stone-800 hover:bg-stone-700 text-white transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <div>
-            <span className="text-xs font-mono opacity-80 bg-black/30 px-2 py-0.5 rounded">
-              Duración: {song.duration}
-            </span>
-            <h2 className="text-2xl font-bold tracking-tight text-white mt-1 drop-shadow-xs">
+          <div className="mt-4">
+            <h2 className="text-2xl font-bold tracking-tight text-white drop-shadow-xs">
               {song.title}
             </h2>
-            <p className="text-xs text-stone-200">{song.artist}</p>
+            {song.videoFileName && (
+              <p className="text-xs text-stone-400 mt-1 font-mono">{song.videoFileName}</p>
+            )}
           </div>
         </div>
 
@@ -181,62 +178,32 @@ export const SongDetailScreen: React.FC<SongDetailModalProps> = ({ song, onClose
             </div>
           )}
 
-          {/* Song Technical Metadata (No storage URLs or download links) */}
+          {/* Song Technical Metadata */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-stone-500">
-                Ficha Técnica de la Alabanza
-              </h4>
-              {song.videoUrl && (
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                  Video MP4 Nativo
-                </span>
-              )}
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="p-3 rounded-lg bg-stone-50 border border-stone-200">
-                <span className="text-stone-500 block text-[11px]">Tonalidad</span>
-                <span className="font-semibold text-stone-900">{song.musicalKey}</span>
-              </div>
-              <div className="p-3 rounded-lg bg-stone-50 border border-stone-200">
-                <span className="text-stone-500 block text-[11px]">Tempo</span>
-                <span className="font-semibold text-stone-900">{song.tempoBpm} BPM</span>
-              </div>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+              Información del Video
+            </h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
               <div className="p-3 rounded-lg bg-stone-50 border border-stone-200">
                 <span className="text-stone-500 block text-[11px]">Duración</span>
-                <span className="font-semibold font-mono text-stone-900">{song.duration}</span>
+                <span className="font-semibold font-mono text-stone-900">{song.duration || '—'}</span>
               </div>
               <div className="p-3 rounded-lg bg-stone-50 border border-stone-200">
-                <span className="text-stone-500 block text-[11px]">Categoría</span>
-                <span className="font-semibold text-stone-900">{song.category}</span>
+                <span className="text-stone-500 block text-[11px]">Formato</span>
+                <span className="font-semibold text-stone-900">{song.mimeType || 'video/mp4'}</span>
+              </div>
+              <div className="p-3 rounded-lg bg-stone-50 border border-stone-200 col-span-2 sm:col-span-1">
+                <span className="text-stone-500 block text-[11px]">Tamaño</span>
+                <span className="font-semibold font-mono text-stone-900">
+                  {song.fileSizeBytes ? `${(song.fileSizeBytes / (1024 * 1024)).toFixed(1)} MB` : '—'}
+                </span>
               </div>
             </div>
-            {song.fileName && (
+            {song.videoFileName && (
               <div className="p-2.5 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-between text-xs text-stone-600">
-                <span>Archivo vinculado: <strong className="font-mono text-stone-800">{song.fileName}</strong></span>
-                {song.fileSizeBytes ? (
-                  <span className="text-stone-500 font-mono text-[11px]">
-                    {(song.fileSizeBytes / (1024 * 1024)).toFixed(2)} MB
-                  </span>
-                ) : null}
+                <span>Archivo MP4: <strong className="font-mono text-stone-800">{song.videoFileName}</strong></span>
               </div>
             )}
-          </div>
-
-          {/* Description & Recommended use */}
-          <div className="space-y-3 text-xs">
-            <div>
-              <span className="font-semibold text-stone-700 block mb-1">Descripción y estilo:</span>
-              <p className="text-stone-600 leading-relaxed bg-stone-50/70 p-3 rounded-lg border border-stone-200">
-                {song.description}
-              </p>
-            </div>
-            <div>
-              <span className="font-semibold text-stone-700 block mb-1">Uso recomendado en servicio:</span>
-              <p className="text-stone-600 bg-stone-50/70 p-3 rounded-lg border border-stone-200">
-                {song.recommendedUse}
-              </p>
-            </div>
           </div>
 
           {/* Security & Private Storage Badge */}

@@ -104,19 +104,13 @@ interface AppContextType {
   revokePermission: (permissionId: string, reason?: string) => void;
 
   // Song management
-  addSong: (song: Omit<Song, 'id' | 'uploadedAt' | 'uploadedBy' | 'isPrivate'>) => Song;
+  addSong: (song: Omit<Song, 'id' | 'uploadedAt' | 'uploadedBy'>) => Song;
   uploadSongWithFile: (
     file: File,
     metadata: {
       title: string;
-      artist: string;
-      category: string;
-      description?: string;
-      musicalKey?: string;
-      tempoBpm?: number;
       durationFormatted?: string;
       durationSeconds?: number;
-      recommendedUse?: string;
     }
   ) => Promise<Song>;
   getVideoPlaybackUrl: (songId: string) => Promise<string | null>;
@@ -610,78 +604,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Song Management (Admin/Superadmin)
-  const addSong = (songData: Omit<Song, 'id' | 'uploadedAt' | 'uploadedBy' | 'isPrivate'>): Song => {
+  const addSong = (songData: Omit<Song, 'id' | 'uploadedAt' | 'uploadedBy'>): Song => {
     const newSong: Song = {
       ...songData,
       id: `song_${Date.now()}`,
       uploadedAt: new Date().toISOString(),
       uploadedBy: currentUser ? currentUser.displayName : 'Administrador',
-      isPrivate: true,
     };
     setSongs((prev) => [newSong, ...prev]);
 
     if (currentUser) {
       logAudit(
         'VIDEO_UPLOADED',
-        'Video subido',
+        'Canción agregada',
         newSong.title,
-        `${currentUser.displayName} subió archivo protegido "${newSong.title}" (${newSong.category}).`
+        `${currentUser.displayName} agregó la canción "${newSong.title}".`
       );
     }
 
-    showToast(`Canción "${newSong.title}" agregada con éxito.`, 'success', 'Video Guardado');
+    showToast(`Canción "${newSong.title}" agregada con éxito.`, 'success');
     return newSong;
   };
 
   /**
-   * Functional upload of a real File (e.g. MP4) in the browser
+   * Functional upload of a real MP4 File in the browser
    */
   const uploadSongWithFile = async (
     file: File,
     metadata: {
       title: string;
-      artist: string;
-      category: string;
-      description?: string;
-      musicalKey?: string;
-      tempoBpm?: number;
       durationFormatted?: string;
       durationSeconds?: number;
-      recommendedUse?: string;
-      thumbnailGradient?: string;
-      thumbnailUrl?: string;
     }
   ): Promise<Song> => {
     const songId = `song_real_${Date.now()}`;
     const uploadResult = await uploadVideo(file, songId);
 
-    const gradients = [
-      'from-amber-700 to-stone-900',
-      'from-blue-700 to-slate-900',
-      'from-emerald-700 to-teal-950',
-      'from-indigo-800 to-slate-950',
-      'from-purple-800 to-stone-950',
-    ];
-
     const newSong: Song = {
       id: songId,
       title: metadata.title.trim(),
-      artist: metadata.artist.trim() || 'Comunidad Cristiana',
-      category: metadata.category || 'Alabanza',
-      duration: metadata.durationFormatted || '03:45',
-      durationSeconds: metadata.durationSeconds || 225,
-      musicalKey: metadata.musicalKey || 'Sol Mayor (G)',
-      tempoBpm: metadata.tempoBpm || 85,
-      thumbnailGradient: metadata.thumbnailGradient || gradients[Math.floor(Math.random() * gradients.length)],
-      thumbnailUrl: metadata.thumbnailUrl,
-      description: metadata.description?.trim() || 'Video MP4 subido para proyección congregacional en Google Meet.',
-      recommendedUse: metadata.recommendedUse || 'Apertura de reunión Google Meet',
+      duration: metadata.durationFormatted || '03:30',
+      durationSeconds: metadata.durationSeconds || 210,
+      videoFileName: file.name,
+      fileSizeBytes: file.size,
+      mimeType: file.type || 'video/mp4',
       uploadedAt: new Date().toISOString(),
       uploadedBy: currentUser ? currentUser.displayName : 'Administrador',
-      isPrivate: true,
       videoUrl: uploadResult.blobUrl,
-      fileName: file.name,
-      fileSizeBytes: file.size,
     };
 
     setSongs((prev) => [newSong, ...prev]);
@@ -718,7 +687,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
     }
 
-    showToast(`Video "${newSong.title}" subido y listo para reproducir.`, 'success', 'Subida Completada');
+    showToast(`Canción "${newSong.title}" subida con éxito.`, 'success', 'Subida completada');
     return newSong;
   };
 

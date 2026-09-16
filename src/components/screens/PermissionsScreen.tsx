@@ -175,7 +175,7 @@ export const PermissionsScreen: React.FC<PermissionsScreenProps> = ({ isUserView
                         </div>
                         {song && (
                           <span className="text-[11px] text-stone-500">
-                            {song.category} · {song.duration}
+                            {song.duration || ''}
                           </span>
                         )}
                       </td>
