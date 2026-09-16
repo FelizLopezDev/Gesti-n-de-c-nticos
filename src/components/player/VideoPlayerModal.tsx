@@ -14,7 +14,7 @@ import { useApp } from '../../context/AppContext';
 import { getVideoSource } from '../../services/videoService';
 
 export const VideoPlayerModal: React.FC = () => {
-  const { activePlayerSong, closePlayer } = useApp();
+  const { activePlayerSong, closePlayer, setIsPlayerFullscreen } = useApp();
 
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [isLoadingSrc, setIsLoadingSrc] = useState<boolean>(true);
@@ -129,6 +129,7 @@ export const VideoPlayerModal: React.FC = () => {
         doc.msFullscreenElement
       );
       setIsFullscreen(isFs);
+      setIsPlayerFullscreen(isFs);
       if (isFs) {
         resetControlsTimer();
       } else {
@@ -149,11 +150,12 @@ export const VideoPlayerModal: React.FC = () => {
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
       document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
       document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+      setIsPlayerFullscreen(false);
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current);
       }
     };
-  }, [resetControlsTimer]);
+  }, [resetControlsTimer, setIsPlayerFullscreen]);
 
   // Keyboard shortcut handler (Space for play/pause, F for fullscreen, Esc handled by browser)
   useEffect(() => {
@@ -168,12 +170,15 @@ export const VideoPlayerModal: React.FC = () => {
       } else if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
         toggleFullscreen();
+      } else if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+        setIsPlayerFullscreen(false);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPlaying, isFullscreen]);
+  }, [isPlaying, isFullscreen, setIsPlayerFullscreen]);
 
   if (!activePlayerSong) return null;
 
@@ -237,10 +242,20 @@ export const VideoPlayerModal: React.FC = () => {
       if (!isCurrentlyFs) {
         if (elem.requestFullscreen) {
           await elem.requestFullscreen();
+          setIsFullscreen(true);
+          setIsPlayerFullscreen(true);
         } else if (elem.webkitRequestFullscreen) {
           await elem.webkitRequestFullscreen();
+          setIsFullscreen(true);
+          setIsPlayerFullscreen(true);
         } else if (elem.msRequestFullscreen) {
           await elem.msRequestFullscreen();
+          setIsFullscreen(true);
+          setIsPlayerFullscreen(true);
+        } else {
+          // Viewport fullscreen fallback
+          setIsFullscreen(true);
+          setIsPlayerFullscreen(true);
         }
       } else {
         if (doc.exitFullscreen) {
@@ -250,9 +265,16 @@ export const VideoPlayerModal: React.FC = () => {
         } else if (doc.msExitFullscreen) {
           await doc.msExitFullscreen();
         }
+        setIsFullscreen(false);
+        setIsPlayerFullscreen(false);
       }
     } catch (err) {
-      console.warn('Fullscreen not supported or allowed:', err);
+      console.warn('Native fullscreen not available or permitted, using viewport fullscreen:', err);
+      setIsFullscreen((prev) => {
+        const next = !prev;
+        setIsPlayerFullscreen(next);
+        return next;
+      });
     }
   };
 
@@ -269,7 +291,7 @@ export const VideoPlayerModal: React.FC = () => {
       id="video-player-backdrop"
       className={
         isFullscreen
-          ? 'fixed inset-0 z-50 bg-black p-0 overflow-hidden select-none'
+          ? 'fixed inset-0 z-[100] bg-black p-0 overflow-hidden select-none'
           : 'fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-xs select-none'
       }
     >
@@ -280,7 +302,7 @@ export const VideoPlayerModal: React.FC = () => {
         onTouchStart={handleUserActivity}
         className={
           isFullscreen
-            ? `relative w-screen h-screen max-w-none rounded-none bg-black flex flex-col justify-center items-center overflow-hidden z-50 ${
+            ? `relative w-screen h-screen max-w-none rounded-none bg-black flex flex-col justify-center items-center overflow-hidden z-[100] ${
                 !isControlsVisible ? 'cursor-none' : 'cursor-default'
               }`
             : 'relative w-full max-w-4xl bg-black rounded-xl overflow-hidden shadow-2xl flex flex-col cursor-default'
@@ -388,15 +410,15 @@ export const VideoPlayerModal: React.FC = () => {
                   isControlsVisible
                     ? 'opacity-100 pointer-events-auto'
                     : 'opacity-0 pointer-events-none'
-                } bg-gradient-to-t from-black/95 via-black/60 to-transparent px-6 pb-6 pt-12 text-white space-y-3`
-              : 'px-4 py-3 bg-stone-900 border-t border-stone-800 text-white space-y-2'
+                } bg-gradient-to-t from-black/95 via-black/60 to-transparent px-3 sm:px-6 pb-3 sm:pb-6 pt-10 sm:pt-12 text-white space-y-2 sm:space-y-3`
+              : 'px-3 sm:px-4 py-2.5 sm:py-3 bg-stone-900 border-t border-stone-800 text-white space-y-2'
           }
         >
           {/* Timeline / Progress Bar */}
-          <div className="flex items-center gap-2.5 text-xs font-mono text-stone-300">
-            <span className="w-10 text-right">{formatTime(currentTime)}</span>
+          <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] sm:text-xs font-mono text-stone-300">
+            <span className="w-8 sm:w-10 text-right">{formatTime(currentTime)}</span>
             <div
-              className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden cursor-pointer relative"
+              className="flex-1 h-2 sm:h-2.5 bg-white/20 rounded-full overflow-hidden cursor-pointer relative"
               onClick={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
                 const pos = (e.clientX - rect.left) / rect.width;
@@ -409,32 +431,32 @@ export const VideoPlayerModal: React.FC = () => {
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <span className="w-10">{formatTime(totalSeconds)}</span>
+            <span className="w-8 sm:w-10">{formatTime(totalSeconds)}</span>
           </div>
 
           {/* Controls row */}
           <div className="flex items-center justify-between">
             {/* Left: Play/Pause & Volume */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               <button
                 id="player-play-pause-btn"
                 onClick={() => {
                   handleTogglePlay();
                   handleUserActivity();
                 }}
-                className="p-1.5 rounded-md hover:bg-white/10 text-white transition-colors cursor-pointer"
+                className="p-2 sm:p-1.5 rounded-md hover:bg-white/10 text-white transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
                 title={isPlaying ? 'Pausar' : 'Reproducir'}
               >
                 {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
               </button>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1 sm:gap-1.5">
                 <button
                   onClick={() => {
                     setIsMuted(!isMuted);
                     handleUserActivity();
                   }}
-                  className="p-1.5 rounded-md hover:bg-white/10 text-stone-300 hover:text-white transition-colors cursor-pointer"
+                  className="p-2 sm:p-1.5 rounded-md hover:bg-white/10 text-stone-300 hover:text-white transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
                   title={isMuted ? 'Activar sonido' : 'Silenciar'}
                 >
                   {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -450,7 +472,7 @@ export const VideoPlayerModal: React.FC = () => {
                     setIsMuted(false);
                     handleUserActivity();
                   }}
-                  className="w-16 sm:w-20 accent-white h-1 bg-white/30 rounded cursor-pointer"
+                  className="w-14 sm:w-20 accent-white h-1 bg-white/30 rounded cursor-pointer"
                 />
               </div>
             </div>
@@ -460,7 +482,7 @@ export const VideoPlayerModal: React.FC = () => {
               <button
                 id="player-fullscreen-btn"
                 onClick={toggleFullscreen}
-                className="p-1.5 rounded-md hover:bg-white/10 text-stone-300 hover:text-white transition-colors cursor-pointer"
+                className="p-2 sm:p-1.5 rounded-md hover:bg-white/10 text-stone-300 hover:text-white transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
                 title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
               >
                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}

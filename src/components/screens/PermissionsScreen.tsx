@@ -58,9 +58,9 @@ export const PermissionsScreen: React.FC<PermissionsScreenProps> = ({ isUserView
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 border-b border-stone-200 pb-4">
         <div>
-          <h1 className="text-xl font-semibold text-stone-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-semibold text-stone-900 tracking-tight">
             {isUserViewOnly ? 'Mis Permisos' : 'Registro de Permisos'}
           </h1>
           <p className="text-xs text-stone-500 mt-0.5">
@@ -68,12 +68,12 @@ export const PermissionsScreen: React.FC<PermissionsScreenProps> = ({ isUserView
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
           {/* Quick Filter buttons */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 max-w-full">
             <button
               onClick={() => setStatusFilter('ALL')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 statusFilter === 'ALL'
                   ? 'bg-stone-900 text-white font-semibold'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
@@ -83,7 +83,7 @@ export const PermissionsScreen: React.FC<PermissionsScreenProps> = ({ isUserView
             </button>
             <button
               onClick={() => setStatusFilter('ACTIVE')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 statusFilter === 'ACTIVE'
                   ? 'bg-emerald-700 text-white font-semibold'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
@@ -93,7 +93,7 @@ export const PermissionsScreen: React.FC<PermissionsScreenProps> = ({ isUserView
             </button>
             <button
               onClick={() => setStatusFilter('EXPIRED')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 statusFilter === 'EXPIRED'
                   ? 'bg-stone-700 text-white font-semibold'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
@@ -103,7 +103,7 @@ export const PermissionsScreen: React.FC<PermissionsScreenProps> = ({ isUserView
             </button>
             <button
               onClick={() => setStatusFilter('REVOKED')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 statusFilter === 'REVOKED'
                   ? 'bg-rose-700 text-white font-semibold'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, KeyRound, ShieldAlert, ArrowRight, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Mail, KeyRound, ShieldAlert, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const LoginScreen: React.FC = () => {
@@ -34,23 +34,19 @@ export const LoginScreen: React.FC = () => {
     }, 450);
   };
 
-  const fillQuickAccount = (sampleEmail: string, samplePass = 'clave123') => {
-    setEmail(sampleEmail);
-    setPassword(samplePass);
-    setErrorMessage(null);
-  };
-
   return (
-    <div className="min-h-screen bg-stone-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+    <div className="min-h-screen bg-stone-100 flex flex-col justify-center py-8 sm:py-12 px-5 sm:px-6 lg:px-8">
+      {/* Title */}
+      <div className="w-full max-w-md mx-auto text-center mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-stone-900">
           Church Media Manager
-        </h2>
+        </h1>
       </div>
 
-      <div className="mt-7 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 shadow-xl sm:rounded-2xl sm:px-10 border border-stone-200">
-          <form className="space-y-5" onSubmit={handleSubmit}>
+      {/* Login Card */}
+      <div className="w-full max-w-md mx-auto">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl border border-stone-200">
+          <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
             {/* Error banner */}
             {errorMessage && (
               <div
@@ -65,7 +61,7 @@ export const LoginScreen: React.FC = () => {
             {/* Email / Username field */}
             <div>
               <label htmlFor="login-email" className="block text-xs font-semibold uppercase tracking-wider text-stone-700">
-                Correo o Usuario
+                Correo o usuario
               </label>
               <div className="mt-1.5 relative rounded-lg shadow-xs">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
@@ -103,12 +99,13 @@ export const LoginScreen: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="block w-full pl-9.5 pr-10 py-2.5 text-sm bg-stone-50/50 border border-stone-300 rounded-lg focus:ring-2 focus:ring-stone-900 focus:border-stone-900 placeholder:text-stone-400 transition-colors"
+                  className="block w-full pl-9.5 pr-11 py-2.5 text-sm bg-stone-50/50 border border-stone-300 rounded-lg focus:ring-2 focus:ring-stone-900 focus:border-stone-900 placeholder:text-stone-400 transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-600"
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-600 cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -116,12 +113,12 @@ export const LoginScreen: React.FC = () => {
             </div>
 
             {/* Submit button */}
-            <div className="pt-1">
+            <div className="pt-2">
               <button
                 id="login-submit-btn"
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-xs text-sm font-semibold text-white bg-stone-900 hover:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-stone-900 disabled:opacity-70 transition-all cursor-pointer"
+                className="w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg shadow-xs text-sm font-semibold text-white bg-stone-900 hover:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-stone-900 disabled:opacity-70 transition-all cursor-pointer"
               >
                 {isLoading ? (
                   <>
@@ -140,59 +137,6 @@ export const LoginScreen: React.FC = () => {
               </button>
             </div>
           </form>
-
-          {/* Quick Account Selector for Prototype Review */}
-          <div className="mt-7 pt-6 border-t border-stone-200">
-            <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider text-center mb-3">
-              Cuentas demo para evaluar el prototipo
-            </p>
-            <div className="space-y-2">
-              <button
-                type="button"
-                id="quick-login-user"
-                onClick={() => fillQuickAccount('carlos.mora@iglesia.org')}
-                className="w-full flex items-center justify-between p-2.5 rounded-lg border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-left transition-colors text-xs"
-              >
-                <div>
-                  <span className="font-semibold text-stone-900">Carlos Mora</span>
-                  <span className="text-stone-500 ml-1.5">(carlos.mora@iglesia.org)</span>
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-stone-100 text-stone-700">
-                  Rol: Usuario
-                </span>
-              </button>
-
-              <button
-                type="button"
-                id="quick-login-admin"
-                onClick={() => fillQuickAccount('marta.solis@iglesia.org')}
-                className="w-full flex items-center justify-between p-2.5 rounded-lg border border-stone-200 hover:border-sky-300 hover:bg-sky-50/50 text-left transition-colors text-xs"
-              >
-                <div>
-                  <span className="font-semibold text-stone-900">Marta Solís</span>
-                  <span className="text-stone-500 ml-1.5">(marta.solis@iglesia.org)</span>
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-sky-100 text-sky-800">
-                  Rol: Admin
-                </span>
-              </button>
-
-              <button
-                type="button"
-                id="quick-login-superadmin"
-                onClick={() => fillQuickAccount('pastor.david@iglesia.org')}
-                className="w-full flex items-center justify-between p-2.5 rounded-lg border border-stone-200 hover:border-purple-300 hover:bg-purple-50/50 text-left transition-colors text-xs"
-              >
-                <div>
-                  <span className="font-semibold text-stone-900">Pastor David</span>
-                  <span className="text-stone-500 ml-1.5">(pastor.david@iglesia.org)</span>
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-800">
-                  Rol: Superadmin
-                </span>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

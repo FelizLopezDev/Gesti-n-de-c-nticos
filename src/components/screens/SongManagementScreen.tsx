@@ -153,9 +153,9 @@ export const SongManagementScreen: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 border-b border-stone-200 pb-4">
         <div>
-          <h1 className="text-xl font-semibold text-stone-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-semibold text-stone-900 tracking-tight">
             Gestión de Canciones
           </h1>
           <p className="text-xs text-stone-500 mt-0.5">
@@ -163,7 +163,7 @@ export const SongManagementScreen: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-64">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
               <Search className="w-4 h-4" />
@@ -180,7 +180,7 @@ export const SongManagementScreen: React.FC = () => {
           <button
             id="open-upload-modal-btn"
             onClick={handleOpenUpload}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors shrink-0 cursor-pointer min-h-[38px] sm:min-h-0"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Subir canción</span>
@@ -269,23 +269,23 @@ export const SongManagementScreen: React.FC = () => {
 
       {/* UPLOAD / EDIT MODAL */}
       {isUploadModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/50 backdrop-blur-xs animate-fadeIn">
-          <div className="relative w-full max-w-lg bg-white rounded-xl shadow-xl border border-stone-200 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-stone-900/50 backdrop-blur-xs animate-fadeIn">
+          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-xl border border-stone-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-200">
+            <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-4 sm:px-5 py-3.5 border-b border-stone-200">
               <h3 className="text-sm font-semibold text-stone-900">
                 {editingSong ? 'Editar Canción' : 'Subir Canción'}
               </h3>
               <button
                 onClick={() => setIsUploadModalOpen(false)}
-                className="text-stone-400 hover:text-stone-700 p-1"
+                className="text-stone-400 hover:text-stone-700 p-1.5 rounded-md min-w-[32px] min-h-[32px] flex items-center justify-center"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Modal Form: ONLY MP4 File + Song Name */}
-            <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 text-xs">
               {/* 1. MP4 File Picker (only if new upload) */}
               {!editingSong && (
                 <div>
@@ -296,7 +296,7 @@ export const SongManagementScreen: React.FC = () => {
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-6 border-2 border-dashed border-stone-300 hover:border-stone-500 rounded-xl text-center cursor-pointer bg-stone-50/50 transition-colors"
+                    className="p-4 sm:p-6 border-2 border-dashed border-stone-300 hover:border-stone-500 rounded-xl text-center cursor-pointer bg-stone-50/50 transition-colors"
                   >
                     <input
                       ref={fileInputRef}
@@ -308,9 +308,9 @@ export const SongManagementScreen: React.FC = () => {
                     {selectedFile ? (
                       <div className="space-y-1.5">
                         <FileVideo className="w-8 h-8 text-stone-700 mx-auto" />
-                        <p className="font-semibold text-stone-900 text-sm">{selectedFile.name}</p>
+                        <p className="font-semibold text-stone-900 text-sm break-all">{selectedFile.name}</p>
                         {/* Automatic technical metadata (read-only) */}
-                        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-stone-100 text-[11px] text-stone-600 font-mono">
+                        <div className="inline-flex flex-wrap items-center justify-center gap-1.5 px-2.5 py-1 rounded bg-stone-100 text-[11px] text-stone-600 font-mono">
                           <span>{formatFileSize(selectedFile.size)}</span>
                           <span>•</span>
                           <span>{selectedFile.type || 'video/mp4'}</span>
@@ -352,11 +352,11 @@ export const SongManagementScreen: React.FC = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-3 border-t border-stone-200 flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-stone-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsUploadModalOpen(false)}
-                  className="px-4 py-2 rounded-lg text-xs font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 transition-colors"
+                  className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg text-xs font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 transition-colors text-center"
                 >
                   Cancelar
                 </button>
@@ -364,7 +364,7 @@ export const SongManagementScreen: React.FC = () => {
                   id="submit-upload-btn"
                   type="submit"
                   disabled={isProcessing || (!editingSong && !selectedFile)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-50 transition-colors cursor-pointer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-50 transition-colors cursor-pointer text-center"
                 >
                   {isProcessing ? (
                     <>

@@ -72,20 +72,20 @@ export const PermissionApprovalModal: React.FC = () => {
   return (
     <div
       id="approval-modal-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs overflow-y-auto animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-stone-900/60 backdrop-blur-xs overflow-y-auto animate-fadeIn"
       onClick={(e) => {
         if (e.target === e.currentTarget) closeApprovalModal();
       }}
     >
       <div
         id="approval-modal-container"
-        className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-stone-200 overflow-hidden"
+        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-xl sm:rounded-2xl shadow-2xl border border-stone-200"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-200 bg-stone-50">
+        <div className="sticky top-0 bg-stone-50 z-10 flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-stone-200">
           <div>
-            <h3 className="text-lg font-bold text-stone-900 tracking-tight flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-600" />
+            <h3 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
               <span>Aprobar Permiso de Reproducción</span>
             </h3>
             <p className="text-xs text-stone-500 mt-0.5">
@@ -94,14 +94,14 @@ export const PermissionApprovalModal: React.FC = () => {
           </div>
           <button
             onClick={closeApprovalModal}
-            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200 transition-colors"
+            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-5">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
           {/* Target song and user summary */}
           <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200 text-xs space-y-1.5">
             <div className="flex justify-between">
@@ -119,14 +119,14 @@ export const PermissionApprovalModal: React.FC = () => {
             <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
               Duración del Acceso
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
               {durationOptions.map((opt) => (
                 <button
                   key={opt.id}
                   type="button"
                   id={`duration-opt-${opt.id}`}
                   onClick={() => setSelectedDurationOption(opt.id)}
-                  className={`py-2 px-3 rounded-lg text-xs font-semibold border transition-all text-center ${
+                  className={`py-2 px-2 sm:px-3 rounded-lg text-xs font-semibold border transition-all text-center cursor-pointer ${
                     selectedDurationOption === opt.id
                       ? 'bg-stone-900 text-white border-stone-900 shadow-xs'
                       : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
@@ -170,13 +170,13 @@ export const PermissionApprovalModal: React.FC = () => {
           {/* Dynamic Human-Readable Confirmation Summary */}
           <div
             id="approval-dynamic-summary"
-            className="p-4 rounded-xl bg-emerald-50/80 border border-emerald-200 text-emerald-950 text-xs space-y-1.5"
+            className="p-3.5 sm:p-4 rounded-xl bg-emerald-50/80 border border-emerald-200 text-emerald-950 text-xs space-y-1.5"
           >
             <div className="flex items-center gap-2 font-bold text-emerald-900">
-              <Clock className="w-4 h-4 text-emerald-700" />
+              <Clock className="w-4 h-4 text-emerald-700 shrink-0" />
               <span>Resumen de Vigencia a Otorgar:</span>
             </div>
-            <p className="leading-relaxed font-medium">
+            <p className="leading-relaxed font-medium text-xs sm:text-[13px]">
               "{approvalTarget.userName} tendrá acceso a '{approvalTarget.songTitle}' desde hoy{' '}
               {calculatedTimes.formattedStart} hasta hoy {calculatedTimes.formattedEnd}."
             </p>
@@ -184,11 +184,11 @@ export const PermissionApprovalModal: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-stone-50 border-t border-stone-200 flex items-center justify-end gap-3">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-stone-50 border-t border-stone-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3">
           <button
             type="button"
             onClick={closeApprovalModal}
-            className="px-4 py-2 text-xs font-semibold text-stone-700 bg-white border border-stone-300 rounded-lg hover:bg-stone-100"
+            className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-xs font-semibold text-stone-700 bg-white border border-stone-300 rounded-lg hover:bg-stone-100 text-center cursor-pointer"
           >
             Cancelar
           </button>
@@ -196,7 +196,7 @@ export const PermissionApprovalModal: React.FC = () => {
             id="confirm-approval-btn"
             type="button"
             onClick={handleConfirm}
-            className="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-600 rounded-lg shadow-xs transition-colors cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:py-2 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-600 rounded-lg shadow-xs transition-colors cursor-pointer text-center"
           >
             <CheckCircle2 className="w-4 h-4" />
             <span>Confirmar y Otorgar Permiso</span>

@@ -143,7 +143,7 @@ export const AuditLogScreen: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-xs">
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -151,14 +151,14 @@ export const AuditLogScreen: React.FC = () => {
                 Superadministrador Exclusivo
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-stone-900 tracking-tight flex items-center gap-2.5">
-              <Activity className="w-6 h-6 text-stone-700" />
-              <span>Registro Cronológico de Auditoría y Seguridad</span>
+            <h1 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight flex flex-wrap items-center gap-2 sm:gap-2.5">
+              <Activity className="w-5 sm:w-6 h-5 sm:h-6 text-stone-700 shrink-0" />
+              <span>Registro de Auditoría</span>
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 border border-stone-200">
                 {filteredLogs.length} eventos
               </span>
             </h1>
-            <p className="text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
               Trazabilidad inmutable de todas las operaciones realizadas en el sistema: reproducciones
               en salas de Google Meet, autorizaciones, denegaciones, altas de canciones y cambios de
               privilegios.
@@ -168,7 +168,7 @@ export const AuditLogScreen: React.FC = () => {
           <button
             id="export-audit-log-btn"
             onClick={handleExportCSV}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-300 transition-colors shadow-2xs shrink-0 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-300 transition-colors shadow-2xs shrink-0 cursor-pointer min-h-[40px]"
           >
             <Download className="w-4 h-4 text-stone-600" />
             <span>Exportar Registro (CSV)</span>

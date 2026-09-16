@@ -92,13 +92,13 @@ export const AdminRequestsScreen: React.FC<AdminRequestsScreenProps> = ({ isUser
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
           {/* Quick status tabs */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 max-w-full">
             {!isUserViewOnly && (
               <button
                 onClick={() => setStatusFilter('ALL')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   statusFilter === 'ALL'
                     ? 'bg-stone-900 text-white font-semibold'
                     : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
@@ -109,7 +109,7 @@ export const AdminRequestsScreen: React.FC<AdminRequestsScreenProps> = ({ isUser
             )}
             <button
               onClick={() => setStatusFilter('PENDING')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 statusFilter === 'PENDING'
                   ? 'bg-amber-600 text-white font-semibold'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
@@ -119,7 +119,7 @@ export const AdminRequestsScreen: React.FC<AdminRequestsScreenProps> = ({ isUser
             </button>
             <button
               onClick={() => setStatusFilter('APPROVED')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 statusFilter === 'APPROVED'
                   ? 'bg-emerald-700 text-white font-semibold'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
@@ -129,7 +129,7 @@ export const AdminRequestsScreen: React.FC<AdminRequestsScreenProps> = ({ isUser
             </button>
             <button
               onClick={() => setStatusFilter('REJECTED')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 statusFilter === 'REJECTED'
                   ? 'bg-rose-700 text-white font-semibold'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
@@ -261,16 +261,16 @@ export const AdminRequestsScreen: React.FC<AdminRequestsScreenProps> = ({ isUser
                       </div>
 
                       {/* Song Status and Actions */}
-                      <div className="flex items-center gap-2 self-end sm:self-auto">
+                      <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-100">
                         <RequestStatusBadge status={item.status} />
 
                         {/* Admin Action Buttons (only shown if not in user-only view and status is PENDING) */}
                         {!isUserViewOnly && currentUser?.role !== 'USER' && item.status === 'PENDING' && (
-                          <div className="flex items-center gap-1.5 ml-2">
+                          <div className="flex items-center gap-1.5">
                             <button
                               id={`approve-song-btn-${item.songId}`}
                               onClick={() => handleOpenApproval(req, item.songId, item.songTitle)}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors shadow-2xs"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors shadow-2xs min-h-[36px] sm:min-h-0 cursor-pointer"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5" />
                               <span>Aprobar</span>
@@ -285,7 +285,7 @@ export const AdminRequestsScreen: React.FC<AdminRequestsScreenProps> = ({ isUser
                                   songTitle: item.songTitle,
                                 })
                               }
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 transition-colors"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 transition-colors min-h-[36px] sm:min-h-0 cursor-pointer"
                             >
                               <XCircle className="w-3.5 h-3.5" />
                               <span>Rechazar</span>

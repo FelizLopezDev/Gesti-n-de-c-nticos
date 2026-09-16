@@ -19,12 +19,13 @@ export const Navbar: React.FC = () => {
     logout,
     selectedSongIdsForRequest,
     setIsRequestModalOpen,
+    isPlayerFullscreen,
   } = useApp();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  if (!currentUser) return null;
+  if (!currentUser || isPlayerFullscreen) return null;
 
   // Determine navigation items by role
   const getNavItems = (): { id: ScreenId; label: string }[] => {
@@ -210,7 +211,7 @@ export const Navbar: React.FC = () => {
             <button
               id="mobile-nav-toggle"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-stone-100"
+              className="md:hidden min-w-[40px] min-h-[40px] flex items-center justify-center p-2 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-stone-100"
               aria-label="Abrir menú"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -221,33 +222,79 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile navigation collapse */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-stone-200 bg-white px-4 py-3 space-y-1">
-          {navItems.map((item) => {
-            const isActive = currentScreen === item.id;
-            return (
+        <div id="mobile-nav-panel" className="md:hidden border-t border-stone-200 bg-white px-4 py-3 space-y-2.5 animate-fadeIn">
+          {/* User info header in mobile menu */}
+          <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-stone-800 text-stone-100 flex items-center justify-center font-semibold text-xs shrink-0">
+                {currentUser.displayName
+                  .split(' ')
+                  .map((n) => n[0])
+                  .slice(0, 2)
+                  .join('')}
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-semibold text-stone-900 truncate">
+                  {currentUser.displayName}
+                </div>
+                <div className="text-[11px] text-stone-500 font-mono truncate">
+                  {currentUser.email}
+                </div>
+              </div>
+            </div>
+            <RoleBadge role={currentUser.role} />
+          </div>
+
+          {/* Navigation Items */}
+          <div className="space-y-1">
+            {navItems.map((item) => {
+              const isActive = currentScreen === item.id;
+              return (
+                <button
+                  key={item.id}
+                  id={`mobile-nav-${item.id}`}
+                  onClick={() => {
+                    setCurrentScreen(item.id);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between min-h-[44px] px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                    isActive ? 'bg-stone-900 text-white' : 'text-stone-700 hover:bg-stone-100'
+                  }`}
+                >
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Quick Request action if regular user has selected songs */}
+          {currentUser.role === 'USER' && selectedSongIdsForRequest.length > 0 && (
+            <div className="pt-1">
               <button
-                key={item.id}
                 onClick={() => {
-                  setCurrentScreen(item.id);
+                  setIsRequestModalOpen(true);
                   setIsMobileMenuOpen(false);
                 }}
-                className={`w-full flex items-center px-3 py-2.5 rounded-lg text-sm font-medium ${
-                  isActive ? 'bg-stone-900 text-white' : 'text-stone-700 hover:bg-stone-100'
-                }`}
+                className="w-full min-h-[44px] flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-bold bg-stone-900 text-white hover:bg-stone-800 transition-colors"
               >
-                <span>{item.label}</span>
+                <span>Solicitar canciones seleccionadas</span>
+                <span className="bg-white text-stone-900 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                  {selectedSongIdsForRequest.length}
+                </span>
               </button>
-            );
-          })}
+            </div>
+          )}
+
+          {/* Logout button */}
           <div className="pt-2 border-t border-stone-100">
             <button
               onClick={() => {
                 logout();
                 setIsMobileMenuOpen(false);
               }}
-              className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50 rounded-lg"
+              className="w-full min-h-[44px] flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg text-left"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4 text-rose-500" />
               <span>Cerrar sesión</span>
             </button>
           </div>

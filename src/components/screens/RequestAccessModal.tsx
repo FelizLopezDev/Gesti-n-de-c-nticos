@@ -62,23 +62,23 @@ export const RequestAccessModal: React.FC = () => {
   return (
     <div
       id="request-modal-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/50 backdrop-blur-xs animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-stone-900/50 backdrop-blur-xs animate-fadeIn"
       onClick={(e) => {
         if (e.target === e.currentTarget) handleClose();
       }}
     >
       <div
         id="request-modal-container"
-        className="relative w-full max-w-lg bg-white rounded-xl shadow-xl border border-stone-200 overflow-hidden"
+        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-xl border border-stone-200"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-200">
+        <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-4 sm:px-5 py-3.5 border-b border-stone-200">
           <h3 className="text-sm font-semibold text-stone-900">
             Solicitar Acceso a Canciones
           </h3>
           <button
             onClick={handleClose}
-            className="p-1 rounded text-stone-400 hover:text-stone-700"
+            className="p-1.5 rounded-md text-stone-400 hover:text-stone-700 min-w-[32px] min-h-[32px] flex items-center justify-center cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -98,13 +98,13 @@ export const RequestAccessModal: React.FC = () => {
             </div>
             <button
               onClick={handleClose}
-              className="px-4 py-2 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors"
+              className="w-full sm:w-auto px-5 py-2.5 sm:py-2 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors cursor-pointer"
             >
               Cerrar
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+          <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 text-xs">
             {/* Selected songs */}
             <div>
               <label className="block text-xs font-semibold text-stone-700 mb-1.5">
@@ -125,7 +125,7 @@ export const RequestAccessModal: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => toggleSongSelectionForRequest(song.id)}
-                        className="text-stone-400 hover:text-rose-600 p-1"
+                        className="text-stone-400 hover:text-rose-600 p-1 cursor-pointer"
                         title="Quitar"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -145,7 +145,7 @@ export const RequestAccessModal: React.FC = () => {
                         toggleSongSelectionForRequest(e.target.value);
                       }
                     }}
-                    className="w-full px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-600 focus:ring-2 focus:ring-stone-900"
+                    className="w-full px-3 py-2 sm:py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-600 focus:ring-2 focus:ring-stone-900"
                   >
                     <option value="">+ Añadir otra canción...</option>
                     {availableToAddSongs.map((s) => (
@@ -190,18 +190,18 @@ export const RequestAccessModal: React.FC = () => {
             </div>
 
             {/* Actions footer */}
-            <div className="pt-3 border-t border-stone-200 flex items-center justify-end gap-2">
+            <div className="pt-3 border-t border-stone-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2 text-xs font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg"
+                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-xs font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg text-center cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={selectedSongs.length === 0 || !purpose.trim() || isSubmitting}
-                className="px-4 py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 disabled:opacity-50 rounded-lg transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 disabled:opacity-50 rounded-lg transition-colors cursor-pointer text-center"
               >
                 {isSubmitting ? 'Enviando...' : 'Enviar solicitud'}
               </button>

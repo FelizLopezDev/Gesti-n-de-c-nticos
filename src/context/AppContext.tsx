@@ -60,6 +60,8 @@ interface AppContextType {
   // Player state
   activePlayerSong: Song | null;
   activePlayerPermission: Permission | null;
+  isPlayerFullscreen: boolean;
+  setIsPlayerFullscreen: (fullscreen: boolean) => void;
   openPlayer: (song: Song) => void;
   closePlayer: () => void;
 
@@ -146,6 +148,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Player state
   const [activePlayerSong, setActivePlayerSong] = useState<Song | null>(null);
   const [activePlayerPermission, setActivePlayerPermission] = useState<Permission | null>(null);
+  const [isPlayerFullscreen, setIsPlayerFullscreen] = useState<boolean>(false);
 
   // Song Detail modal/screen state
   const [selectedSongDetail, setSelectedSongDetail] = useState<Song | null>(null);
@@ -321,6 +324,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const closePlayer = () => {
     setActivePlayerSong(null);
     setActivePlayerPermission(null);
+    setIsPlayerFullscreen(false);
   };
 
   const openSongDetail = (song: Song) => {
@@ -867,6 +871,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       auditLogs,
       activePlayerSong,
       activePlayerPermission,
+      isPlayerFullscreen,
+      setIsPlayerFullscreen,
       openPlayer,
       closePlayer,
       selectedSongDetail,
@@ -910,6 +916,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       auditLogs,
       activePlayerSong,
       activePlayerPermission,
+      isPlayerFullscreen,
       selectedSongDetail,
       selectedSongIdsForRequest,
       isRequestModalOpen,

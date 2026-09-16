@@ -72,11 +72,11 @@ export const LibraryScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex items-center gap-2">
+      {/* Filter Tabs: Horizontal scrollable on mobile */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 max-w-full">
         <button
           onClick={() => setFilterStatus('ALL')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
             filterStatus === 'ALL'
               ? 'bg-stone-900 text-white font-semibold'
               : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
@@ -86,7 +86,7 @@ export const LibraryScreen: React.FC = () => {
         </button>
         <button
           onClick={() => setFilterStatus('AVAILABLE')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
             filterStatus === 'AVAILABLE'
               ? 'bg-emerald-700 text-white font-semibold'
               : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
@@ -96,7 +96,7 @@ export const LibraryScreen: React.FC = () => {
         </button>
         <button
           onClick={() => setFilterStatus('PENDING')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
             filterStatus === 'PENDING'
               ? 'bg-amber-600 text-white font-semibold'
               : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
@@ -124,15 +124,15 @@ export const LibraryScreen: React.FC = () => {
                 <div
                   key={song.id}
                   id={`song-row-${song.id}`}
-                  className="px-5 py-3.5 flex items-center justify-between gap-4 hover:bg-stone-50/70 transition-colors"
+                  className="px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 hover:bg-stone-50/70 transition-colors"
                 >
                   {/* Song Name & Selection */}
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-start sm:items-center gap-3 min-w-0">
                     {!isAvailable && !isPending && (
                       <button
                         type="button"
                         onClick={() => toggleSongSelectionForRequest(song.id)}
-                        className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                        className={`w-4 h-4 mt-0.5 sm:mt-0 rounded border flex items-center justify-center shrink-0 transition-colors cursor-pointer ${
                           isSelected
                             ? 'bg-stone-900 border-stone-900 text-white'
                             : 'border-stone-300 hover:border-stone-500 bg-white'
@@ -144,7 +144,7 @@ export const LibraryScreen: React.FC = () => {
                     )}
 
                     <div className="min-w-0">
-                      <h3 className="text-sm font-semibold text-stone-900 truncate">
+                      <h3 className="text-sm font-semibold text-stone-900 break-words line-clamp-2 sm:truncate">
                         {song.title}
                       </h3>
                       {song.videoFileName && (
@@ -156,20 +156,20 @@ export const LibraryScreen: React.FC = () => {
                   </div>
 
                   {/* Availability + Action */}
-                  <div className="flex items-center gap-4 shrink-0">
+                  <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-4 w-full sm:w-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-100">
                     {/* Availability state */}
                     {isAvailable ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md whitespace-nowrap">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
                         <span>Disponible</span>
                       </span>
                     ) : isPending ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md whitespace-nowrap">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                         <span>En revisión</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-500 bg-stone-100 px-2.5 py-1 rounded-md">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-500 bg-stone-100 px-2.5 py-1 rounded-md whitespace-nowrap">
                         <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
                         <span>Sin acceso</span>
                       </span>
@@ -180,7 +180,7 @@ export const LibraryScreen: React.FC = () => {
                       <button
                         id={`play-song-${song.id}`}
                         onClick={() => openPlayer(song)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors shadow-2xs cursor-pointer"
+                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors shadow-2xs cursor-pointer min-h-[38px] sm:min-h-0"
                       >
                         <Play className="w-3.5 h-3.5 fill-current" />
                         <span>Reproducir</span>
@@ -188,7 +188,7 @@ export const LibraryScreen: React.FC = () => {
                     ) : isPending ? (
                       <button
                         disabled
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-stone-100 text-stone-400 cursor-not-allowed"
+                        className="px-3.5 py-2 sm:py-1.5 rounded-lg text-xs font-medium bg-stone-100 text-stone-400 cursor-not-allowed min-h-[38px] sm:min-h-0"
                       >
                         Solicitada
                       </button>
@@ -196,7 +196,7 @@ export const LibraryScreen: React.FC = () => {
                       <button
                         id={`request-song-${song.id}`}
                         onClick={() => handleRequestSingleSong(song.id)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors cursor-pointer"
+                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-lg text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors cursor-pointer min-h-[38px] sm:min-h-0"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Solicitar</span>
@@ -212,13 +212,13 @@ export const LibraryScreen: React.FC = () => {
 
       {/* Floating Request Bar if multiple songs selected */}
       {selectedSongIdsForRequest.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 bg-stone-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-4 text-xs animate-fadeIn">
-          <span>
-            <strong>{selectedSongIdsForRequest.length}</strong> canción(es) seleccionada(s)
+        <div className="fixed bottom-4 sm:bottom-6 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-30 bg-stone-900 text-white px-4 sm:px-5 py-3 rounded-xl shadow-xl flex items-center justify-between sm:justify-start gap-3 sm:gap-4 text-xs animate-fadeIn">
+          <span className="truncate">
+            <strong>{selectedSongIdsForRequest.length}</strong> seleccionada(s)
           </span>
           <button
             onClick={() => setIsRequestModalOpen(true)}
-            className="px-3 py-1.5 rounded-lg bg-white text-stone-900 font-semibold hover:bg-stone-100 transition-colors"
+            className="px-3.5 py-2 sm:py-1.5 rounded-lg bg-white text-stone-900 font-semibold hover:bg-stone-100 transition-colors cursor-pointer shrink-0"
           >
             Completar solicitud
           </button>

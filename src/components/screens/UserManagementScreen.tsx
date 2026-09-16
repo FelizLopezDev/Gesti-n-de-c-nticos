@@ -116,7 +116,7 @@ export const UserManagementScreen: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-xs">
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -124,14 +124,14 @@ export const UserManagementScreen: React.FC = () => {
                 Superadministrador Exclusivo
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-stone-900 tracking-tight flex items-center gap-2.5">
-              <Users className="w-6 h-6 text-stone-700" />
-              <span>Gestión y Directorio de Usuarios</span>
+            <h1 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight flex flex-wrap items-center gap-2 sm:gap-2.5">
+              <Users className="w-5 sm:w-6 h-5 sm:h-6 text-stone-700 shrink-0" />
+              <span>Gestión de Usuarios</span>
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 border border-stone-200">
-                {users.length} cuentas registradas
+                {users.length} cuentas
               </span>
             </h1>
-            <p className="text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
               Control de identidades congregacionales. Crea colaboradores, asigna privilegios de
               administración, administra contraseñas o deshabilita cuentas en desuso.
             </p>
@@ -140,7 +140,7 @@ export const UserManagementScreen: React.FC = () => {
           <button
             id="create-user-modal-btn"
             onClick={handleOpenCreate}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors shadow-xs shrink-0 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors shadow-xs shrink-0 cursor-pointer min-h-[40px]"
           >
             <UserPlus className="w-4 h-4" />
             <span>Crear Nuevo Usuario</span>
