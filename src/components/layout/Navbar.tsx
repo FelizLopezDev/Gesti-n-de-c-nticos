@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { RoleBadge } from '../common/Badge';
-import { ScreenId, Role } from '../../types';
+import { ScreenId } from '../../types';
 
 export const Navbar: React.FC = () => {
   const {
@@ -17,7 +17,6 @@ export const Navbar: React.FC = () => {
     currentScreen,
     setCurrentScreen,
     logout,
-    switchRolePersona,
     selectedSongIdsForRequest,
     setIsRequestModalOpen,
   } = useApp();
@@ -61,53 +60,6 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-stone-200/90 shadow-xs">
-      {/* Top Prototype Role Switcher */}
-      <div className="bg-stone-900 text-stone-300 text-xs px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between border-b border-stone-800">
-        <div className="flex items-center gap-2">
-          <span className="text-stone-400">Rol:</span>
-          <span className="font-semibold text-white uppercase tracking-wider">{currentUser.role}</span>
-          <span className="hidden sm:inline text-stone-400">({currentUser.displayName})</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-stone-400 hidden sm:inline">Cambiar rol:</span>
-          <div className="inline-flex rounded-md p-0.5 bg-stone-800 border border-stone-700">
-            <button
-              id="switch-to-user-btn"
-              onClick={() => switchRolePersona('USER')}
-              className={`px-2 py-0.5 text-xs rounded transition-colors ${
-                currentUser.role === 'USER'
-                  ? 'bg-stone-600 text-white font-medium'
-                  : 'text-stone-300 hover:text-white'
-              }`}
-            >
-              Usuario
-            </button>
-            <button
-              id="switch-to-admin-btn"
-              onClick={() => switchRolePersona('ADMIN')}
-              className={`px-2 py-0.5 text-xs rounded transition-colors ${
-                currentUser.role === 'ADMIN'
-                  ? 'bg-stone-600 text-white font-medium'
-                  : 'text-stone-300 hover:text-white'
-              }`}
-            >
-              Admin
-            </button>
-            <button
-              id="switch-to-superadmin-btn"
-              onClick={() => switchRolePersona('SUPERADMIN')}
-              className={`px-2 py-0.5 text-xs rounded transition-colors ${
-                currentUser.role === 'SUPERADMIN'
-                  ? 'bg-stone-600 text-white font-medium'
-                  : 'text-stone-300 hover:text-white'
-              }`}
-            >
-              Superadmin
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Main Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
