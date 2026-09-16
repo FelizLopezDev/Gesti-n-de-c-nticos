@@ -605,29 +605,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setSongs((prev) => [newSong, ...prev]);
 
-    // If current user is Admin or Superadmin, grant immediate active permission so they can test playback immediately
-    if (currentUser && (currentUser.role === 'ADMIN' || currentUser.role === 'SUPERADMIN')) {
-      const now = new Date();
-      const expires = new Date();
-      expires.setHours(23, 59, 59, 999);
-
-      const adminPerm: Permission = {
-        id: `perm_auto_${Date.now()}`,
-        userId: currentUser.id,
-        userName: currentUser.displayName,
-        userEmail: currentUser.email,
-        songId: newSong.id,
-        songTitle: newSong.title,
-        grantedBy: 'Sistema (Propietario / Admin)',
-        grantedById: currentUser.id,
-        grantedAt: now.toISOString(),
-        startsAt: now.toISOString(),
-        expiresAt: expires.toISOString(),
-        status: 'ACTIVE',
-      };
-      setPermissions((prev) => [adminPerm, ...prev]);
-    }
-
     if (currentUser) {
       logAudit(
         'VIDEO_UPLOADED',

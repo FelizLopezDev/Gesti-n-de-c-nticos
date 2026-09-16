@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Song } from '../../types';
-import { extractVideoMetadata, formatFileSize } from '../../services/videoService';
+import { formatFileSize } from '../../services/videoService';
 
 export const SongManagementScreen: React.FC = () => {
   const {
@@ -34,14 +34,10 @@ export const SongManagementScreen: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [songName, setSongName] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [videoDuration, setVideoDuration] = useState<string | null>(null);
-  const [videoDurationSec, setVideoDurationSec] = useState<number>(0);
 
   const resetUploadForm = () => {
     setSelectedFile(null);
     setSongName('');
-    setVideoDuration(null);
-    setVideoDurationSec(0);
     setIsProcessing(false);
     setEditingSong(null);
   };
@@ -73,15 +69,6 @@ export const SongManagementScreen: React.FC = () => {
       const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
       setSongName(cleanName.charAt(0).toUpperCase() + cleanName.slice(1));
     }
-
-    // Extract duration in browser
-    try {
-      const meta = await extractVideoMetadata(file);
-      setVideoDuration(meta.durationFormatted);
-      setVideoDurationSec(meta.durationSeconds);
-    } catch {
-      setVideoDuration(null);
-    }
   };
 
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
@@ -93,14 +80,6 @@ export const SongManagementScreen: React.FC = () => {
     if (!songName) {
       const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
       setSongName(cleanName.charAt(0).toUpperCase() + cleanName.slice(1));
-    }
-
-    try {
-      const meta = await extractVideoMetadata(file);
-      setVideoDuration(meta.durationFormatted);
-      setVideoDurationSec(meta.durationSeconds);
-    } catch {
-      setVideoDuration(null);
     }
   };
 
@@ -310,12 +289,6 @@ export const SongManagementScreen: React.FC = () => {
                           <span>{formatFileSize(selectedFile.size)}</span>
                           <span>•</span>
                           <span>{selectedFile.type || 'video/mp4'}</span>
-                          {videoDuration && (
-                            <>
-                              <span>•</span>
-                              <span>{videoDuration}</span>
-                            </>
-                          )}
                         </div>
                       </div>
                     ) : (
