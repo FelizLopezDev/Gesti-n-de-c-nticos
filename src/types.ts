@@ -62,7 +62,7 @@ export interface RequestItem {
 }
 
 export interface AccessRequest {
-  id: string; // e.g. "REQ-2026-081"
+  id: string; // Internal database ID
   userId: string;
   userName: string;
   userEmail: string;

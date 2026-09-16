@@ -112,10 +112,6 @@ export const PermissionApprovalModal: React.FC = () => {
               <span className="text-stone-500">Canción:</span>
               <span className="font-semibold text-stone-900">{approvalTarget.songTitle}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-stone-500">Solicitud ID:</span>
-              <span className="font-mono text-stone-700">{approvalTarget.requestId}</span>
-            </div>
           </div>
 
           {/* Duration Selector */}

@@ -28,7 +28,7 @@ export const AdminRequestsScreen: React.FC<AdminRequestsScreenProps> = ({ isUser
     rejectSongAccess,
   } = useApp();
 
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [statusFilter, setStatusFilter] = useState<string>(isUserViewOnly ? 'PENDING' : 'ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [rejectingSong, setRejectingSong] = useState<{
     requestId: string;
@@ -51,9 +51,8 @@ export const AdminRequestsScreen: React.FC<AdminRequestsScreenProps> = ({ isUser
           return false;
         }
 
-        // Search filter
+        // Search filter (requester name, meeting purpose, or song titles - no request code)
         const matchesSearch =
-          req.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
           req.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           req.meetingPurpose.toLowerCase().includes(searchTerm.toLowerCase()) ||
           req.items.some((i) => i.songTitle.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -96,16 +95,18 @@ export const AdminRequestsScreen: React.FC<AdminRequestsScreenProps> = ({ isUser
         <div className="flex flex-wrap items-center gap-2">
           {/* Quick status tabs */}
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => setStatusFilter('ALL')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                statusFilter === 'ALL'
-                  ? 'bg-stone-900 text-white font-semibold'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
-              }`}
-            >
-              Todas
-            </button>
+            {!isUserViewOnly && (
+              <button
+                onClick={() => setStatusFilter('ALL')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  statusFilter === 'ALL'
+                    ? 'bg-stone-900 text-white font-semibold'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
+                }`}
+              >
+                Todas
+              </button>
+            )}
             <button
               onClick={() => setStatusFilter('PENDING')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
@@ -174,14 +175,17 @@ export const AdminRequestsScreen: React.FC<AdminRequestsScreenProps> = ({ isUser
               {/* Request Header Banner */}
               <div className="p-4 bg-stone-50/80 border-b border-stone-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="font-mono font-bold text-stone-900 text-sm bg-white px-2.5 py-1 rounded border border-stone-200 shadow-2xs">
-                    {req.id}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-stone-700">
-                    <User className="w-3.5 h-3.5 text-stone-500" />
-                    <span className="font-semibold text-stone-900">{req.userName}</span>
-                    <span className="text-stone-400">({req.userEmail})</span>
-                  </div>
+                  {!isUserViewOnly ? (
+                    <div className="flex items-center gap-1.5 text-stone-700">
+                      <User className="w-3.5 h-3.5 text-stone-500" />
+                      <span className="font-semibold text-stone-900">{req.userName}</span>
+                      <span className="text-stone-400">({req.userEmail})</span>
+                    </div>
+                  ) : (
+                    <span className="font-semibold text-stone-900 text-sm">
+                      {req.meetingPurpose}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -199,10 +203,24 @@ export const AdminRequestsScreen: React.FC<AdminRequestsScreenProps> = ({ isUser
 
               {/* Request Details Info */}
               <div className="p-4 border-b border-stone-100 bg-white grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                <div>
-                  <span className="text-stone-500 block text-[11px]">Propósito / Servicio:</span>
-                  <span className="font-semibold text-stone-800">{req.meetingPurpose}</span>
-                </div>
+                {!isUserViewOnly ? (
+                  <div>
+                    <span className="text-stone-500 block text-[11px]">Propósito / Servicio:</span>
+                    <span className="font-semibold text-stone-800">{req.meetingPurpose}</span>
+                  </div>
+                ) : (
+                  <div>
+                    <span className="text-stone-500 block text-[11px]">Fecha requerida:</span>
+                    <span className="font-semibold text-stone-800">
+                      {new Date(req.meetingDate).toLocaleDateString('es-ES', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                )}
                 {req.notes && (
                   <div>
                     <span className="text-stone-500 block text-[11px]">Notas del solicitante:</span>

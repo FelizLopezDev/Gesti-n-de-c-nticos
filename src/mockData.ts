@@ -301,7 +301,7 @@ export const INITIAL_PERMISSIONS: Permission[] = [
 
 export const INITIAL_REQUESTS: AccessRequest[] = [
   {
-    id: 'REQ-2026-081',
+    id: 'req_01',
     userId: 'usr_user_1', // Carlos Mora
     userName: 'Carlos Mora',
     userEmail: 'carlos.mora@iglesia.org',
@@ -324,7 +324,7 @@ export const INITIAL_REQUESTS: AccessRequest[] = [
     ],
   },
   {
-    id: 'REQ-2026-079',
+    id: 'req_02',
     userId: 'usr_user_2', // Elena Gómez
     userName: 'Elena Gómez',
     userEmail: 'elena.gomez@iglesia.org',
@@ -345,7 +345,7 @@ export const INITIAL_REQUESTS: AccessRequest[] = [
     ],
   },
   {
-    id: 'REQ-2026-075',
+    id: 'req_03',
     userId: 'usr_user_3', // Pedro Ramírez
     userName: 'Pedro Ramírez',
     userEmail: 'pedro.ramirez@iglesia.org',
@@ -374,7 +374,7 @@ export const INITIAL_REQUESTS: AccessRequest[] = [
     ],
   },
   {
-    id: 'REQ-2026-070',
+    id: 'req_04',
     userId: 'usr_user_1', // Carlos Mora
     userName: 'Carlos Mora',
     userEmail: 'carlos.mora@iglesia.org',
@@ -445,7 +445,7 @@ export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
     actionLabel: 'Solicitud rechazada',
     affectedUser: 'Pedro Ramírez',
     resourceName: 'Digno y Santo',
-    details: 'Rechazó canción en REQ-2026-075: "Reservado para Santa Cena dominical".',
+    details: 'Rechazó solicitud de canción: "Reservado para Santa Cena dominical".',
   },
   {
     id: 'aud_5',

@@ -30,8 +30,7 @@ export const LibraryScreen: React.FC = () => {
       const matchesStatus =
         filterStatus === 'ALL' ||
         (filterStatus === 'AVAILABLE' && status === 'AVAILABLE') ||
-        (filterStatus === 'PENDING' && status === 'PENDING') ||
-        (filterStatus === 'NO_ACCESS' && (status === 'NO_ACCESS' || status === 'EXPIRED' || status === 'REVOKED'));
+        (filterStatus === 'PENDING' && status === 'PENDING');
 
       return matchesSearch && matchesStatus;
     });
@@ -104,16 +103,6 @@ export const LibraryScreen: React.FC = () => {
           }`}
         >
           En revisión
-        </button>
-        <button
-          onClick={() => setFilterStatus('NO_ACCESS')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-            filterStatus === 'NO_ACCESS'
-              ? 'bg-stone-700 text-white font-semibold'
-              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
-          }`}
-        >
-          Por solicitar
         </button>
       </div>
 

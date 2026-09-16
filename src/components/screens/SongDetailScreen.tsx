@@ -32,7 +32,7 @@ export const SongDetailScreen: React.FC<SongDetailModalProps> = ({ song, onClose
 
   if (!song) return null;
 
-  const { status, permission, pendingRequestId } = getUserSongAccessStatus(song.id);
+  const { status, permission } = getUserSongAccessStatus(song.id);
   const hasActivePermission = status === 'AVAILABLE' && !!permission;
 
   const expiryDate = permission ? new Date(permission.expiresAt) : null;
@@ -152,7 +152,7 @@ export const SongDetailScreen: React.FC<SongDetailModalProps> = ({ song, onClose
                   <div className="flex items-center gap-2 text-xs text-amber-800 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200 w-full">
                     <Clock className="w-4 h-4 text-amber-600 shrink-0" />
                     <span>
-                      Solicitud <strong>{pendingRequestId}</strong> en revisión por los administradores.
+                      Solicitud en revisión por los administradores.
                     </span>
                   </div>
                 ) : (

@@ -377,7 +377,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     });
 
-    const newReqId = `REQ-2026-${String(requests.length + 82).padStart(3, '0')}`;
+    const newReqId = `req_${Date.now()}`;
     const newRequest: AccessRequest = {
       id: newReqId,
       userId: currentUser.id,
@@ -398,13 +398,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     logAudit(
       'REQUEST_CREATED',
       'Solicitud creada',
-      newReqId,
+      currentUser.email,
       `${currentUser.displayName} solicitó acceso a ${songIds.length} canción(es) para "${meetingPurpose}".`,
       currentUser.displayName
     );
 
     showToast(
-      `Solicitud ${newReqId} enviada con éxito. Los administradores revisarán el acceso.`,
+      'Solicitud enviada con éxito. Los administradores revisarán el acceso.',
       'success',
       'Solicitud Registrada'
     );

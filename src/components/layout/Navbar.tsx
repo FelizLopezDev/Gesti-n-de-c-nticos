@@ -63,39 +63,43 @@ export const Navbar: React.FC = () => {
       {/* Main Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
-          {/* Brand Name - Minimalist text without black/yellow church icon */}
-          <div
-            className="cursor-pointer"
-            onClick={() => setCurrentScreen('dashboard')}
-          >
-            <span className="text-base font-semibold tracking-tight text-stone-900">
-              Church Media
-            </span>
+          {/* Brand & Primary Navigation Group */}
+          <div className="flex items-center gap-5 lg:gap-8 min-w-0">
+            <button
+              type="button"
+              id="brand-logo-btn"
+              className="cursor-pointer shrink-0 text-left focus:outline-hidden"
+              onClick={() => setCurrentScreen('dashboard')}
+            >
+              <span className="text-base font-semibold tracking-tight text-stone-900">
+                Church Media
+              </span>
+            </button>
+
+            {/* Desktop Navigation Links */}
+            <nav className="hidden md:flex items-center space-x-1" aria-label="Navegación principal">
+              {navItems.map((item) => {
+                const isActive = currentScreen === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    id={`nav-link-${item.id}`}
+                    onClick={() => setCurrentScreen(item.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+                      isActive
+                        ? 'bg-stone-900 text-white'
+                        : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+            </nav>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-1" aria-label="Navegación principal">
-            {navItems.map((item) => {
-              const isActive = currentScreen === item.id;
-              return (
-                <button
-                  key={item.id}
-                  id={`nav-link-${item.id}`}
-                  onClick={() => setCurrentScreen(item.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    isActive
-                      ? 'bg-stone-900 text-white'
-                      : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </nav>
-
           {/* Actions & Profile */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             {/* Multi-Request Button only for regular User */}
             {currentUser.role === 'USER' && selectedSongIdsForRequest.length > 0 && (
               <button

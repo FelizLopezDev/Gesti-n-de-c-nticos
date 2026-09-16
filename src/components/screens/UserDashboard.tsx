@@ -46,7 +46,6 @@ export const UserDashboard: React.FC = () => {
   // My requests (for User)
   const myRequests = requests.filter((r) => r.userId === currentUser.id);
   const myPendingRequests = myRequests.filter((r) => r.overallStatus === 'PENDING');
-  const myRecentActivity = myRequests.filter((r) => r.overallStatus !== 'PENDING');
 
   // ---------------------------------------------------------------------------
   // 1. SUPERADMIN DASHBOARD
@@ -549,79 +548,40 @@ export const UserDashboard: React.FC = () => {
         )}
       </div>
 
-      {/* 2. Pending Personal Requests & Recent Personal Activity side-by-side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Pending Personal Requests */}
-        <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-stone-900">
-              Mis Solicitudes Pendientes ({myPendingRequests.length})
-            </h2>
-            <button
-              onClick={() => setCurrentScreen('my-requests')}
-              className="text-xs font-medium text-stone-600 hover:text-stone-900 flex items-center gap-1"
-            >
-              <span>Ver todas</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {myPendingRequests.length === 0 ? (
-            <p className="text-xs text-stone-500 py-4 text-center">
-              No tienes solicitudes pendientes de aprobación.
-            </p>
-          ) : (
-            <div className="divide-y divide-stone-100 text-xs">
-              {myPendingRequests.map((req) => (
-                <div key={req.id} className="py-2.5 flex items-center justify-between gap-3">
-                  <div>
-                    <span className="font-medium text-stone-900 block">{req.meetingPurpose}</span>
-                    <span className="text-[11px] text-stone-500">
-                      {req.items.length} canción(es): {req.items.map((i) => i.songTitle).join(', ')}
-                    </span>
-                  </div>
-                  <RequestStatusBadge status={req.overallStatus} />
-                </div>
-              ))}
-            </div>
-          )}
+      {/* 2. Pending Personal Requests */}
+      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-stone-900">
+            Mis Solicitudes Pendientes ({myPendingRequests.length})
+          </h2>
+          <button
+            onClick={() => setCurrentScreen('my-requests')}
+            className="text-xs font-medium text-stone-600 hover:text-stone-900 flex items-center gap-1"
+          >
+            <span>Ver solicitudes</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
 
-        {/* Recent Personal Activity */}
-        <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-stone-900">
-              Actividad Reciente
-            </h2>
-            <button
-              onClick={() => setCurrentScreen('my-requests')}
-              className="text-xs font-medium text-stone-600 hover:text-stone-900 flex items-center gap-1"
-            >
-              <span>Historial</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {myRecentActivity.length === 0 ? (
-            <p className="text-xs text-stone-500 py-4 text-center">
-              No hay actividad reciente registrada.
-            </p>
-          ) : (
-            <div className="divide-y divide-stone-100 text-xs">
-              {myRecentActivity.slice(0, 5).map((req) => (
-                <div key={req.id} className="py-2.5 flex items-center justify-between gap-3">
-                  <div>
-                    <span className="font-medium text-stone-900 block">{req.meetingPurpose}</span>
-                    <span className="text-[11px] text-stone-500">
-                      {req.items.map((i) => i.songTitle).join(', ')}
-                    </span>
-                  </div>
-                  <RequestStatusBadge status={req.overallStatus} />
+        {myPendingRequests.length === 0 ? (
+          <p className="text-xs text-stone-500 py-4 text-center">
+            No tienes solicitudes pendientes de aprobación.
+          </p>
+        ) : (
+          <div className="divide-y divide-stone-100 text-xs">
+            {myPendingRequests.map((req) => (
+              <div key={req.id} className="py-2.5 flex items-center justify-between gap-3">
+                <div>
+                  <span className="font-medium text-stone-900 block">{req.meetingPurpose}</span>
+                  <span className="text-[11px] text-stone-500">
+                    {req.items.length} canción(es): {req.items.map((i) => i.songTitle).join(', ')}
+                  </span>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                <RequestStatusBadge status={req.overallStatus} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
