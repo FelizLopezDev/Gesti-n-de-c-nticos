@@ -17,7 +17,6 @@ export interface User {
   status: UserStatus;
   createdAt: string;
   lastLoginAt: string;
-  avatarUrl?: string;
 }
 
 export interface Song {

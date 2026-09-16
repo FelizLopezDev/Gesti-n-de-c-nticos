@@ -75,15 +75,6 @@ async function getVideoBlobFromDb(videoId: string): Promise<Blob | null> {
   }
 }
 
-export interface VideoMetadata {
-  title: string;
-  durationSeconds?: number;
-  durationFormatted?: string;
-  videoFileName?: string;
-  fileSizeBytes?: number;
-  mimeType?: string;
-}
-
 export interface VideoExtractionResult {
   durationSeconds: number;
   durationFormatted: string;

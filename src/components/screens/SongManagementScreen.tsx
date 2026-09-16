@@ -17,7 +17,7 @@ import { extractVideoMetadata, formatFileSize } from '../../services/videoServic
 export const SongManagementScreen: React.FC = () => {
   const {
     songs,
-    uploadSongWithFile,
+    uploadSong,
     updateSong,
     deleteSong,
     openPlayer,
@@ -130,14 +130,10 @@ export const SongManagementScreen: React.FC = () => {
 
     setIsProcessing(true);
     try {
-      await uploadSongWithFile(selectedFile, {
-        title: songName.trim(),
-        durationFormatted: videoDuration || '03:30',
-        durationSeconds: videoDurationSec || 210,
-      });
+      await uploadSong(selectedFile, songName.trim());
       setIsUploadModalOpen(false);
       resetUploadForm();
-    } catch (err) {
+    } catch {
       showToast('Ocurrió un error al procesar el archivo.', 'error');
     } finally {
       setIsProcessing(false);

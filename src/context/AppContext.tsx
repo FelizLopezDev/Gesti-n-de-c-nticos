@@ -20,7 +20,7 @@ import {
   INITIAL_REQUESTS,
   INITIAL_AUDIT_LOGS,
 } from '../mockData';
-import { uploadVideo, getVideoSource } from '../services/videoService';
+import { uploadVideo, getVideoSource, extractVideoMetadata } from '../services/videoService';
 
 export interface ToastMessage {
   id: string;
@@ -42,7 +42,6 @@ interface AppContextType {
   // Authentication & Current User
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;
-  switchRolePersona: (role: Role) => void;
   login: (email: string, password?: string) => { success: boolean; error?: string };
   logout: () => void;
 
@@ -106,15 +105,7 @@ interface AppContextType {
   revokePermission: (permissionId: string, reason?: string) => void;
 
   // Song management
-  addSong: (song: Omit<Song, 'id' | 'uploadedAt' | 'uploadedBy'>) => Song;
-  uploadSongWithFile: (
-    file: File,
-    metadata: {
-      title: string;
-      durationFormatted?: string;
-      durationSeconds?: number;
-    }
-  ) => Promise<Song>;
+  uploadSong: (file: File, title: string) => Promise<Song>;
   getVideoPlaybackUrl: (songId: string) => Promise<string | null>;
   updateSong: (songId: string, updates: Partial<Song>) => void;
   deleteSong: (songId: string) => void;
@@ -199,35 +190,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       details,
     };
     setAuditLogs((prev) => [newEntry, ...prev]);
-  };
-
-  // Switch persona conveniently for testing
-  const switchRolePersona = (role: Role) => {
-    const matched = users.find((u) => u.role === role && u.status === 'ACTIVE');
-    if (matched) {
-      setCurrentUser(matched);
-      clearSongSelectionForRequest();
-      // Adjust screen if current screen is not permitted for the new role
-      if (
-        role === 'USER' &&
-        ['admin-requests', 'admin-permissions', 'admin-songs', 'admin-users', 'admin-audit'].includes(
-          currentScreen
-        )
-      ) {
-        setCurrentScreen('dashboard');
-      } else if (
-        (role === 'ADMIN' || role === 'SUPERADMIN') &&
-        ['library', 'my-requests', 'my-permissions'].includes(currentScreen)
-      ) {
-        setCurrentScreen('dashboard');
-      } else if (
-        role === 'ADMIN' &&
-        ['admin-users', 'admin-audit'].includes(currentScreen)
-      ) {
-        setCurrentScreen('dashboard');
-      }
-      showToast(`Cambiado a rol: ${role} (${matched.displayName})`, 'info', 'Simulación de rol');
-    }
   };
 
   const login = (email: string) => {
@@ -608,47 +570,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Song Management (Admin/Superadmin)
-  const addSong = (songData: Omit<Song, 'id' | 'uploadedAt' | 'uploadedBy'>): Song => {
-    const newSong: Song = {
-      ...songData,
-      id: `song_${Date.now()}`,
-      uploadedAt: new Date().toISOString(),
-      uploadedBy: currentUser ? currentUser.displayName : 'Administrador',
-    };
-    setSongs((prev) => [newSong, ...prev]);
-
-    if (currentUser) {
-      logAudit(
-        'VIDEO_UPLOADED',
-        'Canción agregada',
-        newSong.title,
-        `${currentUser.displayName} agregó la canción "${newSong.title}".`
-      );
-    }
-
-    showToast(`Canción "${newSong.title}" agregada con éxito.`, 'success');
-    return newSong;
-  };
-
   /**
    * Functional upload of a real MP4 File in the browser
+   * Conceptual abstraction receives only (file, title)
    */
-  const uploadSongWithFile = async (
-    file: File,
-    metadata: {
-      title: string;
-      durationFormatted?: string;
-      durationSeconds?: number;
-    }
-  ): Promise<Song> => {
+  const uploadSong = async (file: File, title: string): Promise<Song> => {
     const songId = `song_real_${Date.now()}`;
+
+    // Extract technical metadata automatically from the video file
+    let durationFormatted = '03:30';
+    let durationSeconds = 210;
+    try {
+      const meta = await extractVideoMetadata(file);
+      durationFormatted = meta.durationFormatted;
+      durationSeconds = meta.durationSeconds;
+    } catch {
+      // Browser fallback if video decoding is not available
+    }
+
     const uploadResult = await uploadVideo(file, songId);
 
     const newSong: Song = {
       id: songId,
-      title: metadata.title.trim(),
-      duration: metadata.durationFormatted || '03:30',
-      durationSeconds: metadata.durationSeconds || 210,
+      title: title.trim(),
+      duration: durationFormatted,
+      durationSeconds,
       videoFileName: file.name,
       fileSizeBytes: file.size,
       mimeType: file.type || 'video/mp4',
@@ -859,7 +805,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     () => ({
       currentUser,
       setCurrentUser,
-      switchRolePersona,
       login,
       logout,
       currentScreen,
@@ -892,8 +837,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       approveSongAccess,
       rejectSongAccess,
       revokePermission,
-      addSong,
-      uploadSongWithFile,
+      uploadSong,
       getVideoPlaybackUrl,
       updateSong,
       deleteSong,
