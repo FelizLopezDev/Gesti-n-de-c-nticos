@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useClerk } from '@clerk/react';
 import {
   LogOut,
   ChevronDown,
@@ -8,7 +9,6 @@ import {
   X,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { RoleBadge } from '../common/Badge';
 import { ScreenId } from '../../types';
 
 export const Navbar: React.FC = () => {
@@ -16,48 +16,25 @@ export const Navbar: React.FC = () => {
     currentUser,
     currentScreen,
     setCurrentScreen,
-    logout,
     selectedSongIdsForRequest,
     setIsRequestModalOpen,
     isPlayerFullscreen,
   } = useApp();
+  const { signOut } = useClerk();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   if (!currentUser || isPlayerFullscreen) return null;
 
-  // Determine navigation items by role
-  const getNavItems = (): { id: ScreenId; label: string }[] => {
-    switch (currentUser.role) {
-      case 'SUPERADMIN':
-        return [
-          { id: 'dashboard', label: 'Inicio' },
-          { id: 'admin-requests', label: 'Solicitudes' },
-          { id: 'admin-songs', label: 'Canciones' },
-          { id: 'admin-permissions', label: 'Permisos' },
-          { id: 'admin-users', label: 'Usuarios' },
-          { id: 'admin-audit', label: 'Auditoría' },
-        ];
-      case 'ADMIN':
-        return [
-          { id: 'dashboard', label: 'Inicio' },
-          { id: 'admin-requests', label: 'Solicitudes' },
-          { id: 'admin-songs', label: 'Canciones' },
-          { id: 'admin-permissions', label: 'Permisos' },
-        ];
-      case 'USER':
-      default:
-        return [
-          { id: 'dashboard', label: 'Inicio' },
-          { id: 'library', label: 'Biblioteca' },
-          { id: 'my-requests', label: 'Mis solicitudes' },
-          { id: 'my-permissions', label: 'Mis permisos' },
-        ];
-    }
-  };
+  const navItems: { id: ScreenId; label: string }[] = [
+    { id: 'dashboard', label: 'Inicio' },
+    { id: 'library', label: 'Biblioteca' },
+    { id: 'my-requests', label: 'Mis solicitudes' },
+    { id: 'my-permissions', label: 'Mis permisos' },
+  ];
 
-  const navItems = getNavItems();
+  const handleSignOut = () => signOut({ redirectUrl: '/' });
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-stone-200/90 shadow-xs">
@@ -101,8 +78,7 @@ export const Navbar: React.FC = () => {
 
           {/* Actions & Profile */}
           <div className="flex items-center gap-3 shrink-0">
-            {/* Multi-Request Button only for regular User */}
-            {currentUser.role === 'USER' && selectedSongIdsForRequest.length > 0 && (
+            {selectedSongIdsForRequest.length > 0 && (
               <button
                 id="open-request-drawer-btn"
                 onClick={() => setIsRequestModalOpen(true)}
@@ -146,57 +122,31 @@ export const Navbar: React.FC = () => {
                       {currentUser.displayName}
                     </p>
                     <p className="text-xs text-stone-500 truncate">{currentUser.email}</p>
-                    <div className="mt-2">
-                      <RoleBadge role={currentUser.role} />
-                    </div>
                   </div>
 
                   <div className="px-2 py-1.5">
-                    {currentUser.role === 'USER' ? (
-                      <>
-                        <button
-                          id="menu-goto-library"
-                          onClick={() => setCurrentScreen('library')}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-lg text-left"
-                        >
-                          <Video className="w-4 h-4 text-stone-500" />
-                          <span>Biblioteca</span>
-                        </button>
-                        <button
-                          id="menu-goto-dashboard"
-                          onClick={() => setCurrentScreen('dashboard')}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-lg text-left"
-                        >
-                          <UserIcon className="w-4 h-4 text-stone-500" />
-                          <span>Inicio</span>
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          id="menu-goto-admin-songs"
-                          onClick={() => setCurrentScreen('admin-songs')}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-lg text-left"
-                        >
-                          <Video className="w-4 h-4 text-stone-500" />
-                          <span>Canciones</span>
-                        </button>
-                        <button
-                          id="menu-goto-dashboard"
-                          onClick={() => setCurrentScreen('dashboard')}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-lg text-left"
-                        >
-                          <UserIcon className="w-4 h-4 text-stone-500" />
-                          <span>Inicio</span>
-                        </button>
-                      </>
-                    )}
+                    <button
+                      id="menu-goto-library"
+                      onClick={() => setCurrentScreen('library')}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-lg text-left"
+                    >
+                      <Video className="w-4 h-4 text-stone-500" />
+                      <span>Biblioteca</span>
+                    </button>
+                    <button
+                      id="menu-goto-dashboard"
+                      onClick={() => setCurrentScreen('dashboard')}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-lg text-left"
+                    >
+                      <UserIcon className="w-4 h-4 text-stone-500" />
+                      <span>Inicio</span>
+                    </button>
                   </div>
 
                   <div className="border-t border-stone-100 px-2 pt-1.5">
                     <button
                       id="menu-logout-btn"
-                      onClick={logout}
+                      onClick={handleSignOut}
                       className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg text-left"
                     >
                       <LogOut className="w-4 h-4 text-rose-500" />
@@ -242,7 +192,6 @@ export const Navbar: React.FC = () => {
                 </div>
               </div>
             </div>
-            <RoleBadge role={currentUser.role} />
           </div>
 
           {/* Navigation Items */}
@@ -267,8 +216,7 @@ export const Navbar: React.FC = () => {
             })}
           </div>
 
-          {/* Quick Request action if regular user has selected songs */}
-          {currentUser.role === 'USER' && selectedSongIdsForRequest.length > 0 && (
+          {selectedSongIdsForRequest.length > 0 && (
             <div className="pt-1">
               <button
                 onClick={() => {
@@ -289,7 +237,7 @@ export const Navbar: React.FC = () => {
           <div className="pt-2 border-t border-stone-100">
             <button
               onClick={() => {
-                logout();
+                handleSignOut();
                 setIsMobileMenuOpen(false);
               }}
               className="w-full min-h-[44px] flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg text-left"

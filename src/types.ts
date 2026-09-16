@@ -13,7 +13,8 @@ export interface User {
   username: string;
   displayName: string;
   email: string;
-  role: Role;
+  // Roles will be supplied by the server-side profile layer in a later phase.
+  role?: Role;
   status: UserStatus;
   createdAt: string;
   lastLoginAt: string;

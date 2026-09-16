@@ -1,4 +1,5 @@
 import React from 'react';
+import { useUser } from '@clerk/react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/layout/Navbar';
 import { ToastContainer } from './components/common/Toast';
@@ -11,83 +12,38 @@ import { RequestAccessModal } from './components/screens/RequestAccessModal';
 import { PermissionApprovalModal } from './components/screens/PermissionApprovalModal';
 import { AdminRequestsScreen } from './components/screens/AdminRequestsScreen';
 import { PermissionsScreen } from './components/screens/PermissionsScreen';
-import { SongManagementScreen } from './components/screens/SongManagementScreen';
-import { UserManagementScreen } from './components/screens/UserManagementScreen';
-import { AuditLogScreen } from './components/screens/AuditLogScreen';
 
 const MainLayout: React.FC = () => {
   const {
-    currentUser,
     currentScreen,
     selectedSongForDetail,
     closeSongDetail,
     isPlayerFullscreen,
   } = useApp();
 
-  // If user is not logged in or screen is explicitly 'login', show LoginScreen
-  if (!currentUser || currentScreen === 'login') {
-    return (
-      <div className="min-h-screen bg-stone-100 flex flex-col justify-center">
-        <LoginScreen />
-        <ToastContainer />
-      </div>
-    );
-  }
-
-  // Render active screen based on navigation and role permissions
+  // Clerk gates this layout. Roles and authorization will be supplied by the
+  // server-side profile layer in a later phase.
   const renderActiveScreen = () => {
     switch (currentScreen) {
       case 'dashboard':
         return <UserDashboard />;
 
       case 'library':
-        if (currentUser.role !== 'USER') {
-          return <SongManagementScreen />;
-        }
         return <LibraryScreen />;
 
       case 'my-requests':
-        if (currentUser.role !== 'USER') {
-          return <AdminRequestsScreen />;
-        }
         return <AdminRequestsScreen isUserViewOnly={true} />;
 
       case 'my-permissions':
-        if (currentUser.role !== 'USER') {
-          return <PermissionsScreen />;
-        }
         return <PermissionsScreen isUserViewOnly={true} />;
 
       case 'admin-requests':
-        if (currentUser.role === 'USER') {
-          return <AdminRequestsScreen isUserViewOnly={true} />;
-        }
-        return <AdminRequestsScreen />;
-
       case 'admin-permissions':
       case 'permissions':
-        if (currentUser.role === 'USER') {
-          return <PermissionsScreen isUserViewOnly={true} />;
-        }
-        return <PermissionsScreen />;
-
       case 'admin-songs':
-        if (currentUser.role === 'USER') {
-          return <LibraryScreen />;
-        }
-        return <SongManagementScreen />;
-
       case 'admin-users':
-        if (currentUser.role !== 'SUPERADMIN') {
-          return <UserDashboard />;
-        }
-        return <UserManagementScreen />;
-
       case 'admin-audit':
-        if (currentUser.role !== 'SUPERADMIN') {
-          return <UserDashboard />;
-        }
-        return <AuditLogScreen />;
+        return <UserDashboard />;
 
       default:
         return <UserDashboard />;
@@ -117,8 +73,22 @@ const MainLayout: React.FC = () => {
 };
 
 export default function App() {
+  const { isLoaded, isSignedIn, user } = useUser();
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-stone-100 flex items-center justify-center">
+        <span className="text-sm text-stone-600">Cargando...</span>
+      </div>
+    );
+  }
+
+  if (!isSignedIn || !user) {
+    return <LoginScreen />;
+  }
+
   return (
-    <AppProvider>
+    <AppProvider authenticatedUser={user}>
       <MainLayout />
     </AppProvider>
   );

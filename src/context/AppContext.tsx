@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useState, useMemo } from 'react';
 import {
   User,
   Role,
@@ -39,11 +39,8 @@ export interface ApprovalTarget {
 }
 
 interface AppContextType {
-  // Authentication & Current User
+  // Authenticated identity. Authorization is intentionally not implemented here.
   currentUser: User | null;
-  setCurrentUser: (user: User | null) => void;
-  login: (email: string, password?: string) => { success: boolean; error?: string };
-  logout: () => void;
 
   // Navigation
   currentScreen: ScreenId;
@@ -125,9 +122,32 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Default to User Carlos Mora for realistic initial view, or superadmin
-  const [currentUser, setCurrentUser] = useState<User | null>(INITIAL_USERS[3]); // Carlos Mora (USER)
+type ClerkUserIdentity = {
+  id: string;
+  username: string | null;
+  fullName: string | null;
+  primaryEmailAddress: { emailAddress: string } | null;
+  createdAt: Date | null;
+};
+
+export const AppProvider: React.FC<{ children: React.ReactNode; authenticatedUser: ClerkUserIdentity }> = ({
+  children,
+  authenticatedUser,
+}) => {
+  const currentUser = useMemo<User>(() => {
+    const email = authenticatedUser.primaryEmailAddress?.emailAddress ?? '';
+    const username = authenticatedUser.username ?? email ?? authenticatedUser.id;
+
+    return {
+      id: authenticatedUser.id,
+      username,
+      displayName: authenticatedUser.fullName ?? username,
+      email,
+      status: 'ACTIVE',
+      createdAt: authenticatedUser.createdAt?.toISOString() ?? new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+    };
+  }, [authenticatedUser]);
   const [currentScreen, setCurrentScreen] = useState<ScreenId>('dashboard');
 
   const [users, setUsers] = useState<User[]>(INITIAL_USERS);
@@ -190,33 +210,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       details,
     };
     setAuditLogs((prev) => [newEntry, ...prev]);
-  };
-
-  const login = (email: string) => {
-    const matched = users.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase() || u.username.toLowerCase() === email.toLowerCase()
-    );
-    if (!matched) {
-      return { success: false, error: 'Credenciales inválidas o usuario no registrado en el sistema parroquial.' };
-    }
-    if (matched.status === 'DISABLED') {
-      return {
-        success: false,
-        error: 'Esta cuenta ha sido deshabilitada por la administración. Comunícate con el Superadministrador.',
-      };
-    }
-    setCurrentUser(matched);
-    setCurrentScreen('dashboard');
-    logAudit('LOGIN_SUCCESS', 'Inicio de sesión', matched.email, `Sesión iniciada con rol ${matched.role}.`, matched.displayName);
-    showToast(`Bienvenido de nuevo, ${matched.displayName}`, 'success');
-    return { success: true };
-  };
-
-  const logout = () => {
-    setCurrentUser(null);
-    setActivePlayerSong(null);
-    setSelectedSongDetail(null);
-    setSelectedSongIdsForRequest([]);
   };
 
   // Check access status of a song for a user
@@ -781,9 +774,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const contextValue = useMemo(
     () => ({
       currentUser,
-      setCurrentUser,
-      login,
-      logout,
       currentScreen,
       setCurrentScreen,
       users,
