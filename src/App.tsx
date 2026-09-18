@@ -1,5 +1,5 @@
-import React from 'react';
-import { useUser } from '@clerk/react';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useSession, useUser } from '@clerk/react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/layout/Navbar';
 import { ToastContainer } from './components/common/Toast';
@@ -12,6 +12,7 @@ import { RequestAccessModal } from './components/screens/RequestAccessModal';
 import { PermissionApprovalModal } from './components/screens/PermissionApprovalModal';
 import { AdminRequestsScreen } from './components/screens/AdminRequestsScreen';
 import { PermissionsScreen } from './components/screens/PermissionsScreen';
+import { createSupabaseClient, isSupabaseConfigured } from './lib/supabase';
 
 const MainLayout: React.FC = () => {
   const {
@@ -72,6 +73,62 @@ const MainLayout: React.FC = () => {
   );
 };
 
+const MissingSupabaseConfiguration: React.FC = () => (
+  <main className="min-h-screen bg-stone-100 flex items-center justify-center px-5">
+    <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-6 text-center shadow-xl">
+      <h1 className="text-xl font-bold tracking-tight text-stone-900">Church Media Manager</h1>
+      <p className="mt-3 text-sm text-stone-600">
+        La conexión de datos aún no está configurada. Agrega la configuración pública de Supabase para continuar.
+      </p>
+    </div>
+  </main>
+);
+
+const AuthenticatedApp: React.FC = () => {
+  const { isLoaded: isUserLoaded, user } = useUser();
+  const { isLoaded: isSessionLoaded, session } = useSession();
+  const getClerkAccessToken = useCallback(
+    async () => session?.getToken() ?? null,
+    [session],
+  );
+  const supabase = useMemo(
+    () => createSupabaseClient(getClerkAccessToken),
+    [getClerkAccessToken],
+  );
+
+  useEffect(() => {
+    if (import.meta.env.DEV && supabase) {
+      void getClerkAccessToken().then((token) => {
+        if (token) {
+          console.info('Cliente de Supabase inicializado con una sesión autenticada de Clerk.');
+        } else {
+          console.warn('No se encontró una sesión de Clerk para la conexión de Supabase.');
+        }
+      }).catch(() => {
+        console.warn('No se pudo preparar la sesión de Clerk para la conexión de Supabase.');
+      });
+    }
+  }, [getClerkAccessToken, supabase]);
+
+  if (!isUserLoaded || !isSessionLoaded || !user) {
+    return (
+      <div className="min-h-screen bg-stone-100 flex items-center justify-center">
+        <span className="text-sm text-stone-600">Cargando...</span>
+      </div>
+    );
+  }
+
+  if (!isSupabaseConfigured || !supabase) {
+    return <MissingSupabaseConfiguration />;
+  }
+
+  return (
+    <AppProvider authenticatedUser={user}>
+      <MainLayout />
+    </AppProvider>
+  );
+};
+
 export default function App() {
   const { isLoaded, isSignedIn, user } = useUser();
 
@@ -87,9 +144,5 @@ export default function App() {
     return <LoginScreen />;
   }
 
-  return (
-    <AppProvider authenticatedUser={user}>
-      <MainLayout />
-    </AppProvider>
-  );
+  return <AuthenticatedApp />;
 }
